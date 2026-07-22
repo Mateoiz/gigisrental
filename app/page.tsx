@@ -227,7 +227,20 @@ export default function GracefulCoquetteGallery() {
           line-height: 1.7; 
         }
         
-        .btn-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.btn-row { 
+          display: flex; 
+          gap: 16px; 
+          flex-wrap: wrap; 
+        }
+        @media (max-width: 640px) {
+          .btn-row {
+            flex-direction: column;
+            width: 100%;
+          }
+          .btn-row .btn {
+            width: 100%;
+          }
+        }
         .btn {
           display: inline-flex; align-items: center; justify-content: center; gap: 10px;
           padding: 16px 36px; border-radius: 999px; font-size: .85rem; font-weight: 500; letter-spacing: .1em;
@@ -373,11 +386,17 @@ export default function GracefulCoquetteGallery() {
 
         /* --- UPGRADED RUNWAY GALLERY GRID --- */
         .gallery { padding: 90px 0 120px; }
-        .gallery-grid {
+.gallery-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 40px 28px;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 40px 24px;
           align-items: start;
+        }
+        @media (max-width: 640px) {
+          .gallery-grid {
+            grid-template-columns: 1fr;
+            gap: 32px 16px;
+          }
         }
 
         .piece {
@@ -580,10 +599,15 @@ export default function GracefulCoquetteGallery() {
           line-height: 1.6;
         }
 
-        .terms-grid {
+.terms-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-          gap: 24px;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 20px;
+        }
+        @media (max-width: 640px) {
+          .terms-grid {
+            grid-template-columns: 1fr;
+          }
         }
         .term-card {
           background: var(--porcelain);
@@ -771,11 +795,55 @@ export default function GracefulCoquetteGallery() {
           box-shadow: 0 10px 25px -8px rgba(90, 122, 104, 0.3);
         }
 
-        @media (max-width: 1024px) {
+@media (max-width: 1024px) {
           .hero .full-wrap { grid-template-columns: 1fr; text-align: center; padding-top: 20px; }
           .hero p.lead { margin-left: auto; margin-right: auto; }
           .btn-row { justify-content: center; }
-          .hero-card { margin: 0 auto; }
+          .hero-card { margin: 0 auto; max-width: 400px; }
+        }
+
+        @media (max-width: 640px) {
+          .full-wrap { padding: 0 16px; }
+          .editorial-section, .booking-section, .gallery { padding: 60px 0; }
+          
+          /* Step cards scale padding for better text wrapping */
+          .step-card {
+            padding: 18px 20px;
+            gap: 14px;
+          }
+          .step-card .step-num {
+            font-size: 1.5rem;
+          }
+          
+          /* Letter watermark scaling for small viewports */
+          .letter-container {
+            padding: 28px 20px;
+            border-radius: 20px;
+          }
+          .letter-watermark {
+            width: 140px;
+            height: 140px;
+            bottom: 10px;
+            right: 10px;
+          }
+          .letter-watermark span {
+            font-size: 3.5rem;
+          }
+          .letter-bullets li {
+            padding: 12px 14px;
+            font-size: .9rem;
+          }
+          
+          /* Booking console mobile tweaks */
+          .selection-banner {
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-start;
+          }
+          .selection-banner button {
+            align-self: flex-end;
+            margin-top: -8px;
+          }
         }
       `}</style>
 
