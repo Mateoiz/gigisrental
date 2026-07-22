@@ -18,7 +18,7 @@ export interface GalleryPiece {
   archiveCode?: string
 }
 
-interface RentalStep {
+interface StepItem {
   num: string
   title: string
   desc: string
@@ -26,38 +26,114 @@ interface RentalStep {
 
 // --- CURATED WARDROBE CATALOG (Strictly Custom-Fitted · Booked Appointments Only) ---
 export const GALLERY_PIECES: GalleryPiece[] = [
-  { id: '1', slug: 'rosalind-gown', title: 'The Rosalind Gown', subtitle: 'Blush Silk Corset Silhouette', material: '100% Raw Mulberry Silk · Custom Fitted · By Appointment Only', gradient: ['#F3D9E0', '#E4B7C4'], image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 01 · Bespoke Drape' },
-  { id: '2', slug: 'ao-dai-imperial', title: 'The Áo Dài Imperial', subtitle: 'Traditional Silk Embroidery', material: 'Hand-Stitched Silk · Custom Fitted · By Appointment Only', gradient: ['#EFE1D6', '#D9BFA9'], image: 'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 02 · Heritage Cut' },
-  { id: '3', slug: 'marguerite-set', title: 'The Marguerite Set', subtitle: 'Lilac Layered Tulle & Ribbon', material: 'Hand-Pleated Tulle · Custom Fitted · By Appointment Only', gradient: ['#E9DCE8', '#CBAFC7'], image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 03 · New Addition' },
-  { id: '4', slug: 'seraphina-corset-dress', title: 'The Seraphina Corset Dress', subtitle: 'Structured Ivory Tulle & Silk', material: 'Boned Bodice Cut · Custom Fitted · By Appointment Only', gradient: ['#F4E3D3', '#E0B48F'], image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 04 · Studio Edit' },
-  { id: '5', slug: 'colette-slip-dress', title: 'The Colette Slip Dress', subtitle: 'Rose Satin Babydoll Cut', material: 'Fluid Satin Drape · Custom Fitted · By Appointment Only', gradient: ['#F0DDE1', '#D9A9B6'], image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 05 · Dainty Edit' },
-  { id: '6', slug: 'minh-emerald-gown', title: 'The Minh Emerald Gown', subtitle: 'Jewel-Toned Velvet & Silk', material: 'Bias Cut Drape · Custom Fitted · By Appointment Only', gradient: ['#E6DED2', '#C6B79E'], image: 'https://images.unsplash.com/photo-1568252542512-9fe8fe9c87bb?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 06 · Evening Wear' },
-  { id: '7', slug: 'angelic-lace-dress', title: 'Angelic Lace Tiered Dress', subtitle: 'Ivory Chantilly Lace & Silk', material: 'Scalloped Hem · Custom Fitted · By Appointment Only', gradient: ['#EAE5E1', '#D4C7BD'], image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 07 · Studio Favorite' },
-  { id: '8', slug: 'vintage-pearl-gown', title: 'Vintage Pearl Evening Gown', subtitle: 'Champagne Satin & Pearl Trim', material: 'Bias Cut Silhouette · Custom Fitted · By Appointment Only', gradient: ['#EFECE6', '#D8CEBE'], image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 08 · Classic Elegance' },
+  { id: '1', slug: 'rosalind-gown', title: 'The Rosalind Gown', subtitle: 'Blush Silk Corset Silhouette', material: '100% Raw Mulberry Silk · Custom Fitted', gradient: ['#F3D9E0', '#E4B7C4'], image: 'https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 01 · Bespoke Drape' },
+  { id: '2', slug: 'ao-dai-imperial', title: 'The Áo Dài Imperial', subtitle: 'Traditional Silk Embroidery', material: 'Hand-Stitched Silk · Custom Fitted', gradient: ['#EFE1D6', '#D9BFA9'], image: 'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 02 · Heritage Cut' },
+  { id: '3', slug: 'marguerite-set', title: 'The Marguerite Set', subtitle: 'Lilac Layered Tulle & Ribbon', material: 'Hand-Pleated Tulle · Custom Fitted', gradient: ['#E9DCE8', '#CBAFC7'], image: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 03 · New Addition' },
+  { id: '4', slug: 'seraphina-corset-dress', title: 'The Seraphina Corset Dress', subtitle: 'Structured Ivory Tulle & Silk', material: 'Boned Bodice Cut · Custom Fitted', gradient: ['#F4E3D3', '#E0B48F'], image: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 04 · Studio Edit' },
+  { id: '5', slug: 'colette-slip-dress', title: 'The Colette Slip Dress', subtitle: 'Rose Satin Babydoll Cut', material: 'Fluid Satin Drape · Custom Fitted', gradient: ['#F0DDE1', '#D9A9B6'], image: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 05 · Dainty Edit' },
+  { id: '6', slug: 'minh-emerald-gown', title: 'The Minh Emerald Gown', subtitle: 'Jewel-Toned Velvet & Silk', material: 'Bias Cut Drape · Custom Fitted', gradient: ['#E6DED2', '#C6B79E'], image: 'https://images.unsplash.com/photo-1568252542512-9fe8fe9c87bb?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 06 · Evening Wear' },
+  { id: '7', slug: 'angelic-lace-dress', title: 'Angelic Lace Tiered Dress', subtitle: 'Ivory Chantilly Lace & Silk', material: 'Scalloped Hem · Custom Fitted', gradient: ['#EAE5E1', '#D4C7BD'], image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=800&q=80', category: 'cocktail', archiveCode: 'Look 07 · Studio Favorite' },
+  { id: '8', slug: 'vintage-pearl-gown', title: 'Vintage Pearl Evening Gown', subtitle: 'Champagne Satin & Pearl Trim', material: 'Bias Cut Silhouette · Custom Fitted', gradient: ['#EFECE6', '#D8CEBE'], image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=800&q=80', category: 'gowns', archiveCode: 'Look 08 · Classic Elegance' },
 ]
 
-const RENTAL_STEPS: RentalStep[] = [
-  { num: '01', title: 'Explore the Archive', desc: 'Browse our exhibition of modern Vietnamese gowns and cocktail silhouettes to curate your desired aesthetic.' },
-  { num: '02', title: 'Book a Private Appointment', desc: 'All fittings and consultations are conducted strictly through set booked appointments at our studio showroom.' },
-  { num: '03', title: 'Bespoke Measurement & Drape', desc: 'Every garment in our archive is custom-fitted. Our styling team takes precise measurements during your visit to tailor the drape to your exact silhouette.' },
-  { num: '04', title: 'Wear with Grace', desc: 'Collect your freshly steamed, custom-tailored look for your event, then return it by the agreed studio timeline while we handle delicate dry cleaning.' },
+// --- FLOWING EDITORIAL CONTENT GUIDELINES ---
+const HOW_TO_RENT_STEPS: StepItem[] = [
+  { num: '01', title: 'Choose Your Dress', desc: 'Browse our collection and send us a screenshot of your chosen dress, along with your size and event date.' },
+  { num: '02', title: 'Check Availability', desc: "We'll confirm if your selected dress is available on your preferred date." },
+  { num: '03', title: 'Send Your Details', desc: 'Provide one valid government-issued ID and a selfie holding your ID for verification.' },
+  { num: '04', title: 'Complete Agreement', desc: 'Fill out our Rental Form and sign the Rental Agreement before your booking can be confirmed.' },
+  { num: '05', title: 'Read Our Policy', desc: 'Please review our rental terms and guidelines carefully prior to your fitting.' },
+  { num: '06', title: 'Secure Reservation', desc: 'Settle the required reservation fee to officially reserve your dress.' },
+  { num: '07', title: 'Pick Up Your Dress', desc: "Claim your dress on your scheduled pickup date. We'll have it ready for your special occasion." },
+  { num: '08', title: 'Return Your Dress', desc: 'Return the dress on the agreed date in its original condition to avoid additional charges.' },
 ]
 
-const TERMS_LIST = [
-  'Every silhouette in our collection is strictly custom-fitted; we do not offer off-the-rack sizing without a booked preliminary fitting.',
-  'Studio consultations, measurements, and wardrobe reservations are arranged exclusively through set booked appointments.',
-  'One valid government-issued ID is required for identity verification prior to releasing any custom-fitted archive piece.',
-  'Standard custom reservation timelines run for 3 days by default; extended editorial or event periods may be arranged during your consultation.',
-  'Fitting appointment slots are held for 24 hours from the time of scheduling without a deposit to allow graceful flexibility for our clientele.',
+const FITTING_STEPS: StepItem[] = [
+  { num: '01', title: 'Book Your Appointment', desc: 'Send us a message with your preferred date and time for your fitting appointment.' },
+  { num: '02', title: 'Wait for Confirmation', desc: "We'll confirm your schedule based on our private studio availability." },
+  { num: '03', title: 'Visit Our Studio', desc: 'Come to our studio at your confirmed appointment time. Please arrive on time so we can assist you comfortably.' },
+  { num: '04', title: 'Browse & Try On', desc: 'Explore our collection and try on your favorite modern Vietnamese dresses to find the perfect fit.' },
+  { num: '05', title: 'Reserve Your Dress', desc: "Once you've found your favorite, we'll check its availability and reserve it for your event." },
+  { num: '06', title: 'Complete Your Booking', desc: 'Submit the required details and settle the down payment to confirm your reservation.' },
+  { num: '07', title: 'See You on Pickup Day', desc: 'Your dress will be prepared and ready for pickup on your scheduled rental date.' },
 ]
+
+const TERMS_CONDITIONS = [
+  { num: '01', title: 'Booking Confirmation', desc: 'Your booking is confirmed once all required information has been submitted and the reservation fee has been received.' },
+  { num: '02', title: 'Verification', desc: 'One valid government-issued ID and a selfie holding your ID are required for verification before your booking can be confirmed.' },
+  { num: '03', title: 'Reservation Fee', desc: 'A reservation fee is required to secure your chosen dress. This fee is non-refundable and non-transferable once your booking is confirmed.' },
+  { num: '04', title: 'Rental Period', desc: 'Please return the dress on the agreed return date and time to ensure availability for our next client.' },
+  { num: '05', title: 'Late Returns', desc: "Late returns may be subject to additional charges. If you're running late, kindly let us know as soon as possible." },
+  { num: '06', title: 'Handle with Care', desc: 'Please take extra care of the dress throughout your rental. Avoid stains, tears, burns, broken zippers, missing accessories, or any damage.' },
+  { num: '07', title: 'No Alterations', desc: 'Do not cut, sew, pin, dye, iron, wash, or make any permanent alterations to the dress.' },
+  { num: '08', title: 'Damage & Loss', desc: 'Clients are responsible for any permanent stains, excessive damage, missing accessories, or loss of the rented dress. Corresponding charges may apply.' },
+  { num: '09', title: 'Cancellations & Changes', desc: 'Reservation fees are non-refundable. Any changes to your booking are subject to dress availability.' },
+  { num: '10', title: 'A Friendly Reminder', desc: 'We kindly ask that you return the dress clean, complete, and in the same condition you received it.' },
+]
+
+const REMINDER_BULLETS = [
+  'Keep the dress in a clean, dry, and secure place when not in use.',
+  'Please avoid contact with food, drinks, makeup, ink, perfumes, and other substances that may cause stains or damage.',
+  'Handle all accessories with care and return them together with the dress.',
+  'Any permanent stains, tears, missing accessories, or other damages may be subject to corresponding charges.',
+  'Please return the dress on or before the agreed return date to avoid late fees.',
+]
+
+const ROW_ONE = [
+  { text: 'Mulberry Silk', style: 'serif-reg' },
+  { text: 'Studio Archive', style: 'serif-ital' },
+  { text: 'Curated Silhouettes', style: 'serif-reg' },
+  { text: 'Chantilly Lace', style: 'serif-ital' },
+  { text: 'Modern Vietnamese', style: 'serif-reg' },
+  { text: 'Bespoke Craftsmanship', style: 'serif-ital' },
+  { text: 'Blush & Ivory', style: 'serif-reg' },
+  { text: 'Editorial Wardrobe', style: 'serif-ital' },
+] as const
+
+const ROW_TWO = [
+  { text: 'Booked Appointments', style: 'serif-ital' },
+  { text: 'Hand-Pleated Tulle', style: 'serif-reg' },
+  { text: 'Custom Fitted', style: 'serif-ital' },
+  { text: 'Satin & Pearl', style: 'serif-reg' },
+  { text: 'The Studio Closet', style: 'serif-ital' },
+  { text: 'Rosalind · Marguerite · Seraphina', style: 'serif-reg' },
+  { text: 'Wear with Grace', style: 'serif-ital' },
+  { text: 'Reserved for You', style: 'serif-reg' },
+] as const
+
+const doubled = <T,>(arr: readonly T[]) => [...arr, ...arr]
+
+const FILTERS = [
+  { key: 'all', label: 'Complete Wardrobe' },
+  { key: 'gowns', label: 'Evening Gowns' },
+  { key: 'cocktail', label: 'Cocktail & Slips' },
+] as const
 
 export default function GracefulCoquetteGallery() {
   const [selectedPiece, setSelectedPiece] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'gowns' | 'cocktail'>('all')
+  const [bookingConfirmed, setBookingConfirmed] = useState(false)
 
   const filteredPieces = GALLERY_PIECES.filter(
     (piece) => filter === 'all' || piece.category === filter
   )
+
+  const handleSelectPiece = (e: React.MouseEvent, title: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setSelectedPiece(title)
+    setBookingConfirmed(false)
+    document.getElementById('book')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const handleClearSelection = () => {
+    setSelectedPiece(null)
+    setBookingConfirmed(false)
+  }
+
+  const handleBookAppointment = () => {
+    setBookingConfirmed(true)
+  }
 
   return (
     <>
@@ -74,6 +150,7 @@ export default function GracefulCoquetteGallery() {
           --gold: #B8916A;
           --line: #F2E6E8;
           --blush-ribbon: #FDF2F5;
+          --success: #5A7A68;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -158,6 +235,7 @@ export default function GracefulCoquetteGallery() {
         }
         .btn-primary { background: var(--mocha); color: #fff; border: none; box-shadow: 0 12px 28px -10px rgba(61, 44, 46, .4); }
         .btn-primary:hover { background: var(--rose-deep); transform: translateY(-3px); box-shadow: 0 18px 34px -10px rgba(169, 100, 124, .6); }
+        .btn-primary:disabled { background: var(--success); opacity: 1; cursor: default; transform: none; box-shadow: none; }
         .btn-ghost { border: 1px solid var(--rose); color: var(--mocha); background: #fff; }
         .btn-ghost:hover { background: var(--blush-ribbon); border-color: var(--rose-deep); transform: translateY(-2px); }
 
@@ -219,7 +297,11 @@ export default function GracefulCoquetteGallery() {
           white-space: nowrap;
           will-change: transform;
         }
-        .dual-marquee:hover .dual-track { animation-play-state: paused; }
+        .dual-marquee:hover .dual-track,
+        .dual-marquee:focus-within .dual-track { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) {
+          .dual-track { animation: none !important; }
+        }
         @keyframes drift-left {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
@@ -259,210 +341,440 @@ export default function GracefulCoquetteGallery() {
         .section-head { text-align: center; max-width: 800px; margin: 0 auto 60px; }
         .section-head h2 { font-size: clamp(2.6rem, 4.8vw, 4.2rem); font-style: italic; font-weight: 500; }
 
-        /* EDITORIAL GALLERY */
-        .gallery { padding: 80px 0 120px; }
+        /* FILTER PILLS */
+        .filter-row { display: flex; gap: 12px; justify-content: center; margin-top: 32px; flex-wrap: wrap; }
+        .filter-pill {
+          padding: 10px 28px;
+          border-radius: 999px;
+          border: 1px solid var(--rose);
+          background: transparent;
+          color: var(--mocha);
+          font-size: .8rem;
+          font-weight: 500;
+          cursor: pointer;
+          text-transform: uppercase;
+          letter-spacing: .1em;
+          transition: all .3s ease;
+        }
+        .filter-pill:hover { background: var(--blush-ribbon); }
+        .filter-pill.active {
+          background: var(--mocha);
+          color: #fff;
+          box-shadow: 0 8px 20px -6px rgba(61, 44, 46, 0.3);
+        }
+
+        .no-results {
+          text-align: center;
+          padding: 60px 24px;
+          color: var(--mocha-soft);
+          font-style: italic;
+          font-size: 1.1rem;
+        }
+
+        /* --- UPGRADED RUNWAY GALLERY GRID --- */
+        .gallery { padding: 90px 0 120px; }
         .gallery-grid {
           display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          grid-auto-rows: 320px;
-          gap: 20px;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 40px 28px;
+          align-items: start;
         }
-        @media (max-width: 1100px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 680px)  { .gallery-grid { grid-template-columns: 1fr; } }
-
-        .piece:nth-child(1) { grid-row: span 2; }
-        .piece:nth-child(4) { grid-row: span 2; }
-        .piece:nth-child(6) { grid-column: span 2; grid-row: span 1; }
 
         .piece {
           position: relative;
-          border-radius: 20px;
-          overflow: hidden;
-          cursor: pointer;
-          border: none;
-          padding: 0;
-          background: transparent;
-          display: block;
+          display: flex;
+          flex-direction: column;
+          text-decoration: none;
+          color: var(--mocha);
+          group: relative;
         }
 
+        /* 3:4 Runway Photo Frame without dark text overlays */
         .piece .thumb {
-          position: absolute;
-          inset: 0;
+          position: relative;
+          width: 100%;
+          aspect-ratio: 3/4;
           border-radius: 20px;
           overflow: hidden;
-          transition: transform .7s cubic-bezier(0.16, 1, 0.3, 1);
+          background: var(--blush-ribbon);
+          margin-bottom: 18px;
+          box-shadow: 0 16px 36px -12px rgba(61, 44, 46, 0.08);
+          border: 1px solid var(--line);
+          transition: box-shadow 0.35s ease, border-color 0.35s ease;
         }
-        .piece:hover .thumb { transform: scale(1.04); }
+        .piece:hover .thumb {
+          box-shadow: 0 24px 48px -12px rgba(61, 44, 46, 0.16);
+          border-color: var(--rose);
+        }
         .piece .thumb img {
           width: 100%;
           height: 100%;
           object-fit: cover;
           display: block;
+          transition: transform .7s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .piece:hover .thumb img { transform: scale(1.04); }
 
+        /* Subtle film grain overlay */
         .piece .thumb::before {
           content: '';
           position: absolute;
           inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-          opacity: 0.18;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+          opacity: 0.2;
           z-index: 1;
           pointer-events: none;
         }
 
-        .piece .thumb::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            to top,
-            rgba(30, 18, 20, 0.85) 0%,
-            rgba(30, 18, 20, 0.22) 52%,
-            transparent 100%
-          );
-          z-index: 2;
-          transition: opacity .4s ease;
-        }
-        .piece:hover .thumb::after {
-          opacity: 0.94;
-        }
-
         .piece .archive-badge {
-          position: absolute; top: 20px; left: 20px; z-index: 10;
-          background: rgba(255, 253, 249, 0.15);
+          position: absolute; top: 16px; left: 16px; z-index: 5;
+          background: rgba(255, 253, 249, 0.92);
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
-          color: rgba(255,253,249,0.95);
+          color: var(--rose-deep);
           font-family: 'Jost', sans-serif;
           padding: 5px 14px; border-radius: 999px; font-size: 0.68rem;
           font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
-          border: 1px solid rgba(255,255,255,0.25);
-          transition: opacity .3s;
+          border: 1px solid rgba(242, 230, 232, 0.8);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
-        .piece:hover .archive-badge { opacity: 0; }
 
+        /* Clean Information Panel Below Image */
         .piece .info {
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          z-index: 5;
-          padding: 28px 28px 24px;
-          text-align: left;
-          transform: translateY(0);
-          transition: transform .5s cubic-bezier(0.16, 1, 0.3, 1);
+          display: flex;
+          flex-direction: column;
+          padding: 0 4px;
         }
 
         .piece h3 {
-          font-size: clamp(1.5rem, 2.2vw, 2rem);
+          font-size: 1.7rem;
           font-style: italic;
           font-weight: 500;
-          color: #fff;
-          line-height: 1.1;
-          margin-bottom: 6px;
-          text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+          color: var(--mocha);
+          line-height: 1.15;
+          margin-bottom: 4px;
+          transition: color 0.2s ease;
         }
+        .piece:hover h3 { color: var(--rose-deep); }
+
         .piece .subtitle {
-          font-size: .78rem;
-          color: rgba(255,253,249,0.8);
+          font-size: .8rem;
+          color: var(--mocha);
           font-weight: 400;
           letter-spacing: .08em;
           text-transform: uppercase;
-          margin-bottom: 0;
-        }
-        .piece .material {
-          font-size: .75rem;
-          color: rgba(255,253,249,0.6);
-          font-style: italic;
-          font-weight: 300;
-          margin-top: 4px;
-          max-height: 0;
-          overflow: hidden;
-          opacity: 0;
-          transition: max-height .4s ease, opacity .4s ease .1s;
-        }
-        .piece:hover .material {
-          max-height: 40px;
-          opacity: 1;
+          margin-bottom: 6px;
         }
 
+        .piece .material {
+          font-size: .8rem;
+          color: var(--mocha-soft);
+          font-style: italic;
+          font-weight: 300;
+          margin-bottom: 16px;
+        }
+
+        /* Streamlined Side-by-Side Action Row */
         .piece .meta-action {
-          margin-top: 0;
-          padding-top: 0;
-          border-top: none;
-          max-height: 0;
-          overflow: hidden;
-          opacity: 0;
-          transition: max-height .4s ease, opacity .35s ease .1s;
-        }
-        .piece:hover .meta-action {
-          max-height: 60px;
-          opacity: 1;
-          margin-top: 16px;
-        }
-        .piece .inquire-btn {
-          display: inline-flex;
+          padding-top: 14px;
+          border-top: 1px dashed var(--line);
+          display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 10px;
+          gap: 12px;
+        }
+
+        .piece .view-link {
+          font-size: .75rem;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: .12em;
+          color: var(--mocha-soft);
+          transition: color 0.2s ease;
+        }
+        .piece:hover .view-link { color: var(--mocha); }
+
+        .piece .select-btn {
           font-size: .72rem;
           font-weight: 500;
           text-transform: uppercase;
-          letter-spacing: .14em;
-          border: 1px solid rgba(255,255,255,0.45);
-          background: rgba(255,255,255,0.12);
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
+          letter-spacing: .12em;
+          border: 1px solid var(--rose);
+          background: #fff;
+          color: var(--rose-deep);
+          cursor: pointer;
+          padding: 8px 18px;
+          border-radius: 999px;
+          transition: all .25s ease;
+        }
+        .piece .select-btn:hover {
+          background: var(--rose-deep);
+          color: #fff;
+          border-color: var(--rose-deep);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(169, 100, 124, 0.2);
+        }
+
+        /* --- FREE FLOWING EDITORIAL SECTIONS --- */
+        .editorial-section {
+          padding: 100px 0;
+          border-top: 1px solid var(--line);
+        }
+
+        .journey-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: clamp(40px, 6vw, 80px);
+        }
+        @media (max-width: 900px) {
+          .journey-grid { grid-template-columns: 1fr; }
+        }
+        .journey-col h3 {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: 2.2rem;
+          color: var(--mocha);
+          margin-bottom: 32px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--rose);
+        }
+        .step-list {
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+        }
+        .step-card {
+          background: var(--card);
+          border: 1px solid var(--line);
+          padding: 24px 28px;
+          border-radius: 20px;
+          transition: transform 0.25s ease, border-color 0.25s ease;
+          display: flex;
+          gap: 20px;
+          align-items: flex-start;
+        }
+        .step-card:hover {
+          transform: translateY(-3px);
+          border-color: var(--rose);
+          box-shadow: 0 12px 24px -10px rgba(61, 44, 46, 0.08);
+        }
+        .step-card .step-num {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: 1.8rem;
+          font-weight: 600;
+          color: var(--rose-deep);
+          line-height: 1;
+          flex-shrink: 0;
+        }
+        .step-card h4 {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 6px;
+          color: var(--mocha);
+        }
+        .step-card p {
+          font-size: .9rem;
+          color: var(--mocha-soft);
+          line-height: 1.6;
+        }
+
+        .terms-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 24px;
+        }
+        .term-card {
+          background: var(--porcelain);
+          border: 1px solid var(--line);
+          padding: 24px;
+          border-radius: 18px;
+          transition: border-color 0.2s ease;
+        }
+        .term-card:hover {
+          border-color: var(--rose);
+        }
+        .term-card h4 {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: var(--rose-deep);
+          margin-bottom: 8px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .term-card h4 span {
+          font-style: italic;
+          font-weight: 400;
+          color: var(--mocha);
+        }
+        .term-card p {
+          font-size: .92rem;
+          color: var(--mocha-soft);
+          line-height: 1.6;
+        }
+
+        .letter-container {
+          max-width: 860px;
+          margin: 0 auto;
+          background: #FDF4F6;
+          border: 1px solid var(--rose);
+          border-radius: 28px;
+          padding: clamp(36px, 6vw, 64px);
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 20px 50px -10px rgba(61, 44, 46, 0.06);
+        }
+        .letter-watermark {
+          position: absolute;
+          bottom: 20px;
+          right: 20px;
+          width: 200px;
+          height: 200px;
+          border-radius: 50%;
+          background: rgba(212, 139, 157, 0.12);
+          border: 2px solid rgba(212, 139, 157, 0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
+          user-select: none;
+        }
+        .letter-watermark span {
+          font-family: 'Parisienne', cursive;
+          font-size: 5rem;
+          color: rgba(169, 100, 124, 0.15);
+        }
+        .letter-body {
+          position: relative;
+          z-index: 2;
+        }
+        .letter-body h3 {
+          font-family: 'Parisienne', cursive;
+          font-size: clamp(2.4rem, 4vw, 3.2rem);
+          color: var(--rose-deep);
+          text-align: center;
+          margin-bottom: 6px;
+        }
+        .letter-body p.subtitle {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: 1.25rem;
+          color: var(--mocha-soft);
+          text-align: center;
+          margin-bottom: 32px;
+        }
+        .letter-body p.prose {
+          font-size: 1.05rem;
+          color: var(--mocha);
+          line-height: 1.8;
+          margin-bottom: 28px;
+        }
+        .letter-bullets {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          margin-bottom: 36px;
+        }
+        .letter-bullets li {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          font-size: .95rem;
+          color: var(--mocha-soft);
+          line-height: 1.6;
+          background: rgba(255, 253, 249, 0.8);
+          padding: 14px 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(242, 230, 232, 0.8);
+        }
+        .letter-bullets li::before {
+          content: '✦';
+          color: var(--rose-deep);
+          font-size: 0.8rem;
+          margin-top: 3px;
+        }
+        .letter-signoff {
+          text-align: center;
+          margin-top: 40px;
+        }
+        .letter-signoff .closing {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: 1.3rem;
+          color: var(--mocha);
+        }
+        .letter-signoff .name {
+          font-family: 'Parisienne', cursive;
+          font-size: 2.4rem;
+          color: var(--rose-deep);
+          margin-top: 4px;
+        }
+
+        /* --- BOOKING CONSOLE --- */
+        .booking-section {
+          padding: 80px 0 120px;
+          background: var(--card);
+          border-top: 1px solid var(--line);
+        }
+        .booking-box {
+          max-width: 680px;
+          margin: 0 auto;
+          text-align: center;
+        }
+        .booking-box h2 {
+          font-family: 'Cormorant Garamond', serif;
+          font-style: italic;
+          font-size: clamp(2.2rem, 4vw, 3.2rem);
+          margin-bottom: 12px;
+        }
+        .booking-box p {
+          color: var(--mocha-soft);
+          font-size: 1rem;
+          margin-bottom: 36px;
+        }
+        .selection-banner {
+          background: var(--mocha);
+          color: #fff;
+          padding: 16px 24px;
+          border-radius: 16px;
+          font-size: 0.95rem;
+          margin-bottom: 24px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          letter-spacing: 0.04em;
+          box-shadow: 0 10px 25px -8px rgba(61, 44, 46, 0.3);
+          text-align: left;
+        }
+        .selection-banner button {
+          background: none;
+          border: none;
           color: #fff;
           cursor: pointer;
-          padding: 9px 20px;
-          border-radius: 999px;
-          transition: background .25s, border-color .25s;
+          font-weight: 300;
+          font-size: 1.3rem;
+          line-height: 1;
         }
-        .piece .inquire-btn:hover {
-          background: rgba(255,255,255,0.25);
-          border-color: rgba(255,255,255,0.8);
-        }
-
-        /* HOW TO RENT */
-        .how { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 100px 0; }
-        .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; }
-        .step { padding: 36px; background: var(--porcelain); border: 1px solid var(--line); border-radius: 24px; transition: border-color .3s; }
-        .step:hover { border-color: var(--rose); }
-        .step .num {
-          font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 500; font-size: 3.5rem; color: var(--rose-deep);
-          display: block; margin-bottom: 12px; line-height: 1;
-        }
-        .step h3 { font-size: 1.5rem; margin-bottom: 12px; font-style: italic; }
-        .step p { font-size: .92rem; color: var(--mocha-soft); line-height: 1.7; }
-
-        /* TERMS + APPOINTMENT SPLIT */
-        .split { padding: 100px 0; }
-        .split .full-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 80px); align-items: start; }
-        .panel { background: var(--card); border: 1px solid var(--line); border-radius: 32px; padding: clamp(32px, 4vw, 56px); box-shadow: 0 20px 50px rgba(0,0,0,0.02); }
-        .panel h2 { font-size: clamp(2.2rem, 3.2vw, 3rem); font-style: italic; margin-bottom: 24px; }
-        .terms-list { list-style: none; }
-        .terms-list li {
-          display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px dashed var(--line); font-size: .95rem; color: var(--mocha-soft); line-height: 1.6;
-        }
-        .terms-list li:last-child { border-bottom: none; }
-        .terms-list svg { flex-shrink: 0; margin-top: 4px; }
-
-        .appt-panel { background: linear-gradient(160deg, #fff, var(--blush-ribbon)); border: 1px solid var(--rose); }
-        .appt-row { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 28px; }
-        .appt-row .ico {
-          width: 44px; height: 44px; border-radius: 50%; background: var(--card); border: 1px solid var(--rose); flex-shrink: 0;
-          display: flex; align-items: center; justify-content: center; color: var(--rose-deep); font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-style: italic;
-        }
-        .appt-row h3 { font-size: 1.4rem; font-style: italic; margin-bottom: 4px; }
-        .appt-row p { font-size: .92rem; color: var(--mocha-soft); }
-        .reminder {
-          margin-top: 32px; background: var(--card); border: 1px solid var(--line); border-radius: 20px;
-          padding: 20px 24px; font-size: .9rem; color: var(--mocha-soft); font-style: italic; text-align: center;
+        .confirmation-banner {
+          background: var(--success);
+          color: #fff;
+          padding: 16px 24px;
+          border-radius: 16px;
+          font-size: 0.95rem;
+          margin-top: 20px;
+          text-align: center;
+          letter-spacing: 0.02em;
+          box-shadow: 0 10px 25px -8px rgba(90, 122, 104, 0.3);
         }
 
         @media (max-width: 1024px) {
           .hero .full-wrap { grid-template-columns: 1fr; text-align: center; padding-top: 20px; }
           .hero p.lead { margin-left: auto; margin-right: auto; }
           .btn-row { justify-content: center; }
-          .split .full-wrap { grid-template-columns: 1fr; }
           .hero-card { margin: 0 auto; }
         }
       `}</style>
@@ -505,53 +817,28 @@ export default function GracefulCoquetteGallery() {
       </section>
 
       {/* --- DUAL-ROW DRIFTING MARQUEE --- */}
-      {(() => {
-        const ROW_ONE = [
-          { text: 'Mulberry Silk', style: 'serif-reg' },
-          { text: 'Studio Archive', style: 'serif-ital' },
-          { text: 'Curated Silhouettes', style: 'serif-reg' },
-          { text: 'Chantilly Lace', style: 'serif-ital' },
-          { text: 'Modern Vietnamese', style: 'serif-reg' },
-          { text: 'Bespoke Craftsmanship', style: 'serif-ital' },
-          { text: 'Blush & Ivory', style: 'serif-reg' },
-          { text: 'Editorial Wardrobe', style: 'serif-ital' },
-        ]
-        const ROW_TWO = [
-          { text: 'Booked Appointments', style: 'serif-ital' },
-          { text: 'Hand-Pleated Tulle', style: 'serif-reg' },
-          { text: 'Custom Fitted', style: 'serif-ital' },
-          { text: 'Satin & Pearl', style: 'serif-reg' },
-          { text: 'The Studio Closet', style: 'serif-ital' },
-          { text: 'Rosalind · Marguerite · Seraphina', style: 'serif-reg' },
-          { text: 'Wear with Grace', style: 'serif-ital' },
-          { text: 'Reserved for You', style: 'serif-reg' },
-        ]
-        const doubled = (arr: typeof ROW_ONE) => [...arr, ...arr]
-        return (
-          <div className="dual-marquee" aria-hidden="true">
-            <div className="dual-marquee-row">
-              <div className="dual-track">
-                {doubled(ROW_ONE).map((item, i) => (
-                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    <span className={`dual-word ${item.style}`}>{item.text}</span>
-                    <span className="dual-sep" />
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="dual-marquee-row">
-              <div className="dual-track">
-                {doubled(ROW_TWO).map((item, i) => (
-                  <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                    <span className={`dual-word ${item.style}`}>{item.text}</span>
-                    <span className="dual-sep" />
-                  </span>
-                ))}
-              </div>
-            </div>
+      <div className="dual-marquee" aria-hidden="true">
+        <div className="dual-marquee-row">
+          <div className="dual-track">
+            {doubled(ROW_ONE).map((item, i) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <span className={`dual-word ${item.style}`}>{item.text}</span>
+                <span className="dual-sep" />
+              </span>
+            ))}
           </div>
-        )
-      })()}
+        </div>
+        <div className="dual-marquee-row">
+          <div className="dual-track">
+            {doubled(ROW_TWO).map((item, i) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                <span className={`dual-word ${item.style}`}>{item.text}</span>
+                <span className="dual-sep" />
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* --- EXPANSIVE EDITORIAL SHOWROOM --- */}
       <section className="gallery" id="gallery">
@@ -562,128 +849,190 @@ export default function GracefulCoquetteGallery() {
             <p style={{ color: 'var(--mocha-soft)', fontSize: '1.05rem', marginTop: '12px', fontWeight: 300 }}>
               A full-width exhibition of evening gowns, babydoll cuts, and structured silhouettes available exclusively by appointment.
             </p>
-            
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '32px', flexWrap: 'wrap' }}>
-              {(['all', 'gowns', 'cocktail'] as const).map((cat) => (
+
+            <div className="filter-row" role="group" aria-label="Filter wardrobe by category">
+              {FILTERS.map(({ key, label }) => (
                 <button
-                  key={cat}
-                  onClick={() => setFilter(cat)}
-                  style={{
-                    padding: '10px 28px',
-                    borderRadius: '999px',
-                    border: '1px solid var(--rose)',
-                    background: filter === cat ? 'var(--mocha)' : 'transparent',
-                    color: filter === cat ? '#fff' : 'var(--mocha)',
-                    fontSize: '0.8rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.1em',
-                    transition: 'all 0.3s ease',
-                    boxShadow: filter === cat ? '0 8px 20px -6px rgba(61, 44, 46, 0.3)' : 'none'
-                  }}
+                  key={key}
+                  onClick={() => setFilter(key)}
+                  className={`filter-pill ${filter === key ? 'active' : ''}`}
+                  aria-pressed={filter === key}
                 >
-                  {cat === 'all' ? 'Complete Wardrobe' : cat === 'gowns' ? 'Evening Gowns' : 'Cocktail & Slips'}
+                  {label}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="gallery-grid">
-            {filteredPieces.map((piece) => (
-              <Link key={piece.id} href={`/products/${piece.slug}`} className="piece">
-                <div
-                  className="thumb"
-                  style={{
-                    background: `linear-gradient(150deg, ${piece.gradient[0]} 0%, ${piece.gradient[1]} 60%, ${piece.gradient[1]}cc 100%)`,
-                  }}
+          {filteredPieces.length === 0 ? (
+            <p className="no-results">
+              No pieces currently match this category. Please check back soon.
+            </p>
+          ) : (
+            <div className="gallery-grid">
+              {filteredPieces.map((piece) => (
+                <Link
+                  key={piece.id}
+                  href={`/products/${piece.slug}`}
+                  className="piece"
                 >
-                  <img src={piece.image} alt={piece.title} />
-                </div>
-
-                {piece.archiveCode && (
-                  <span className="archive-badge">{piece.archiveCode}</span>
-                )}
-
-                <div className="info">
-                  <h3>{piece.title}</h3>
-                  <p className="subtitle">{piece.subtitle}</p>
-                  <p className="material">{piece.material}</p>
-                  <div className="meta-action">
-                    <span className="inquire-btn">
-                      View Details
-                    </span>
+                  <div
+                    className="thumb"
+                    style={{
+                      background: `linear-gradient(150deg, ${piece.gradient[0]} 0%, ${piece.gradient[1]} 60%, ${piece.gradient[1]}cc 100%)`,
+                    }}
+                  >
+                    <img src={piece.image} alt={piece.title} />
+                    {piece.archiveCode && (
+                      <span className="archive-badge">{piece.archiveCode}</span>
+                    )}
                   </div>
-                </div>
-              </Link>
-            ))}
+
+                  <div className="info">
+                    <h3>{piece.title}</h3>
+                    <p className="subtitle">{piece.subtitle}</p>
+                    <p className="material">{piece.material}</p>
+                    
+                    <div className="meta-action">
+                      <span className="view-link">
+                        View Look →
+                      </span>
+                      <button
+                        type="button"
+                        className="select-btn"
+                        onClick={(e) => handleSelectPiece(e, piece.title)}
+                      >
+                        Select for Fitting +
+                      </button>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* --- FLOWING EDITORIAL SECTION 1: THE RENTAL & FITTING JOURNEY --- */}
+      <section className="editorial-section" id="how">
+        <div className="full-wrap">
+          <div className="section-head">
+            <span className="eyebrow">studio process</span>
+            <h2>The Rental &amp; Fitting Experience</h2>
+            <p style={{ color: 'var(--mocha-soft)', fontSize: '1.05rem', marginTop: '12px', fontWeight: 300 }}>
+              From preliminary consultation to your event day, every step is curated for graceful ease.
+            </p>
+          </div>
+
+          <div className="journey-grid">
+            <div className="journey-col">
+              <h3>How to Rent</h3>
+              <div className="step-list">
+                {HOW_TO_RENT_STEPS.map((step) => (
+                  <div key={step.num} className="step-card">
+                    <span className="step-num">{step.num}</span>
+                    <div>
+                      <h4>{step.title}</h4>
+                      <p>{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="journey-col">
+              <h3>Fitting Appointment</h3>
+              <div className="step-list">
+                {FITTING_STEPS.map((step) => (
+                  <div key={step.num} className="step-card">
+                    <span className="step-num">{step.num}</span>
+                    <div>
+                      <h4>{step.title}</h4>
+                      <p>{step.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* --- HOW TO RENT --- */}
-      <section className="how" id="how">
+      {/* --- FLOWING EDITORIAL SECTION 2: WARDROBE GUIDELINES & TERMS --- */}
+      <section className="editorial-section" id="terms" style={{ background: '#FFFDF9' }}>
         <div className="full-wrap">
           <div className="section-head">
-            <span className="eyebrow">the rental experience</span>
-            <h2>Graceful reserve &amp; return</h2>
+            <span className="eyebrow">rental guidelines</span>
+            <h2>Terms &amp; Conditions</h2>
+            <p style={{ color: 'var(--mocha-soft)', fontSize: '1.05rem', marginTop: '12px', fontWeight: 300 }}>
+              Please review our studio care policies prior to confirming your bespoke wardrobe reservation.
+            </p>
           </div>
-          <div className="how-grid">
-            {RENTAL_STEPS.map((step) => (
-              <div key={step.num} className="step">
-                <span className="num">{step.num}</span>
-                <h3>{step.title}</h3>
-                <p>{step.desc}</p>
+
+          <div className="terms-grid">
+            {TERMS_CONDITIONS.map((term) => (
+              <div key={term.num} className="term-card">
+                <h4>
+                  {term.num} <span>— {term.title}</span>
+                </h4>
+                <p>{term.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* --- EXPANDED SPLIT SECTION --- */}
-      <section className="split" id="terms">
+      {/* --- FLOWING EDITORIAL SECTION 3: LETTER FROM THE SHOWROOM --- */}
+      <section className="editorial-section">
         <div className="full-wrap">
-          <div className="panel">
-            <h2>Wardrobe Guidelines</h2>
-            <ul className="terms-list">
-              {TERMS_LIST.map((term, i) => (
-                <li key={i}>
-                  <svg width="18" height="18" viewBox="0 0 16 16">
-                    <path
-                      d="M3 8l3 3 7-7"
-                      stroke="#A9647C"
-                      strokeWidth="1.5"
-                      fill="none"
-                    />
-                  </svg>
-                  {term}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <div className="letter-container">
+            <div className="letter-watermark">
+              <span>GR</span>
+            </div>
+            <div className="letter-body">
+              <h3>A Friendly Reminder</h3>
+              <p className="subtitle">To Our Valued Client</p>
+              
+              <p className="prose">
+                Thank you for choosing Gigi&apos;s Rentals. We truly appreciate your trust in us and hope you enjoy wearing one of our custom-fitted silhouettes. To help us maintain the quality and beauty of every rental, we kindly ask that you handle your dress with care throughout the rental period.
+              </p>
 
-          <div className="panel appt-panel" id="book">
-            <h2>Request a Studio Fitting</h2>
-            
+              <ul className="letter-bullets">
+                {REMINDER_BULLETS.map((bullet, idx) => (
+                  <li key={idx}>{bullet}</li>
+                ))}
+              </ul>
+
+              <p className="prose" style={{ marginBottom: 0 }}>
+                Thank you for treating our dresses with love and care. We hope you feel beautiful and confident in your chosen dress. Until your next special occasion!
+              </p>
+
+              <div className="letter-signoff">
+                <div className="closing">With love,</div>
+                <div className="name">Gigi&apos;s Rentals</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- BOOKING CONSOLE --- */}
+      <section className="booking-section" id="book">
+        <div className="full-wrap">
+          <div className="booking-box">
+            <span className="eyebrow" style={{ marginBottom: '8px' }}>private showroom</span>
+            <h2>Book Your Studio Appointment</h2>
+            <p>
+              All silhouettes are strictly custom-fitted. Select your favorite look above or book a preliminary fitting consultation directly with our styling team.
+            </p>
+
             {selectedPiece && (
-              <div
-                style={{
-                  background: 'var(--mocha)',
-                  color: '#fff',
-                  padding: '14px 20px',
-                  borderRadius: '16px',
-                  fontSize: '0.85rem',
-                  marginBottom: '24px',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  letterSpacing: '0.04em'
-                }}
-              >
-                <span>Selected look: <strong style={{ fontStyle: 'italic', fontWeight: 600 }}>{selectedPiece}</strong></span>
+              <div className="selection-banner">
+                <span>
+                  Selected look: <strong style={{ fontStyle: 'italic', fontWeight: 600 }}>{selectedPiece}</strong>
+                </span>
                 <button
-                  onClick={() => setSelectedPiece(null)}
-                  style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontWeight: 300, fontSize: '1.2rem' }}
+                  onClick={handleClearSelection}
                   aria-label="Remove selection"
                 >
                   ✕
@@ -691,39 +1040,25 @@ export default function GracefulCoquetteGallery() {
               </div>
             )}
 
-            <div className="appt-row">
-              <div className="ico">I</div>
-              <div>
-                <h3>Select your schedule</h3>
-                <p>Choose an available appointment slot from our private showroom calendar.</p>
-              </div>
-            </div>
-            <div className="appt-row">
-              <div className="ico">II</div>
-              <div>
-                <h3>Share event details</h3>
-                <p>Provide your occasion date and sizing preferences so we can prepare your bespoke drape.</p>
-              </div>
-            </div>
-            <div className="appt-row">
-              <div className="ico">III</div>
-              <div>
-                <h3>Studio confirmation</h3>
-                <p>Our styling team will verify wardrobe availability and confirm your private appointment directly.</p>
-              </div>
-            </div>
-
             <button
               className="btn btn-primary"
-              style={{ width: '100%', justifyContent: 'center', marginTop: '16px', padding: '18px' }}
-              onClick={() => alert(`Opening appointment schedule for: ${selectedPiece || 'General Showroom Fitting'}...`)}
+              style={{ width: '100%', justifyContent: 'center', padding: '18px', fontSize: '.9rem' }}
+              onClick={handleBookAppointment}
+              disabled={bookingConfirmed}
             >
-              {selectedPiece ? `Book Appointment for ${selectedPiece}` : 'Book a Studio Appointment'}
+              {bookingConfirmed
+                ? 'Appointment Request Sent ✓'
+                : selectedPiece
+                  ? `Book Fitting Appointment for ${selectedPiece}`
+                  : 'Book a Studio Fitting Appointment'}
             </button>
 
-            <div className="reminder">
-              Please note: All silhouettes are custom-fitted. We do not offer off-the-rack rentals without a preliminary booked fitting appointment.
-            </div>
+            {bookingConfirmed && (
+              <div className="confirmation-banner" role="status">
+                Thank you — our studio team will reach out shortly to confirm your private schedule
+                {selectedPiece ? ` for ${selectedPiece}` : ''}.
+              </div>
+            )}
           </div>
         </div>
       </section>

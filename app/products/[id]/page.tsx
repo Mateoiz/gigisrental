@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, use } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/app/components/Navbar'
 import Footer from '@/app/components/Footer'
@@ -10,9 +9,8 @@ import { GALLERY_PIECES, GalleryPiece } from '@/app/page'
 type ParamsShape = { slug?: string; id?: string } | Promise<{ slug?: string; id?: string }>
 
 export default function ProductPage({ params }: { params: ParamsShape }) {
-  const router = useRouter()
   const resolvedParams = params instanceof Promise ? use(params) : params
-  
+
   const rawIdentifier = decodeURIComponent(
     resolvedParams.slug ?? resolvedParams.id ?? ''
   ).trim().toLowerCase()
@@ -32,7 +30,10 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           body { background: #FFFDF9 !important; color: #3D2C2E; font-family: 'Jost', sans-serif; }
         `}</style>
         <Navbar />
-        <div style={{ padding: '140px 24px', textAlign: 'center', background: '#FFFDF9', minHeight: '60vh' }}>
+        <div
+          data-testid="product-not-found"
+          style={{ padding: '140px 24px', textAlign: 'center', background: '#FFFDF9', minHeight: '60vh' }}
+        >
           <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '3rem', color: '#3D2C2E' }}>
             Garment Not Found
           </h1>
@@ -41,6 +42,7 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           </p>
           <Link
             href="/#gallery"
+            data-testid="return-to-showroom-link"
             style={{
               display: 'inline-block',
               padding: '16px 36px',
@@ -116,7 +118,7 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           min-height: 100vh;
           width: 100%;
           position: relative;
-          z-index: 1; /* Keeps entire page structure cleanly below any navbar */
+          z-index: 1;
         }
 
         .pp-wrap {
@@ -126,7 +128,6 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           color: var(--mocha);
         }
 
-        /* --- CLEAN EDITORIAL BREADCRUMB --- */
         .pp-breadcrumb {
           display: flex;
           align-items: center;
@@ -137,14 +138,13 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           color: var(--mocha-soft);
           margin-bottom: 36px;
           position: relative;
-          z-index: 2; /* Low z-index prevents collisions with navbar */
+          z-index: 2;
         }
         .pp-breadcrumb a { color: var(--mocha-soft); text-decoration: none; transition: color .2s; }
         .pp-breadcrumb a:hover { color: var(--rose-deep); }
         .pp-breadcrumb span.sep { color: var(--line); }
         .pp-breadcrumb span.current { color: var(--mocha); font-weight: 500; }
 
-        /* --- MAIN PRODUCT SPLIT --- */
         .pp-grid {
           display: grid;
           grid-template-columns: 1.3fr 0.9fr;
@@ -155,7 +155,6 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           .pp-grid { grid-template-columns: 1fr; }
         }
 
-        /* --- THUMBNAIL RAIL + GALLERY (NATURAL SCROLL, NO STICKY TRAP) --- */
         .pp-gallery-container {
           display: grid;
           grid-template-columns: 100px 1fr;
@@ -235,11 +234,10 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
           border: 1px solid rgba(242, 230, 232, 0.8);
         }
 
-        /* --- STICKY INFO PANEL --- */
         .pp-sticky-panel {
           position: sticky;
           top: 120px;
-          z-index: 3; /* Controlled z-index prevents overlapping navbar */
+          z-index: 3;
           padding-bottom: 40px;
         }
         @media (max-width: 1024px) {
@@ -452,23 +450,23 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
         }
       `}</style>
 
-      <div className="pp-page-container">
+      <div className="pp-page-container" data-testid="product-page">
         <Navbar />
 
         <div className="pp-wrap">
-          <nav className="pp-breadcrumb" aria-label="Breadcrumb">
+          <nav className="pp-breadcrumb" aria-label="Breadcrumb" data-testid="breadcrumb">
             <Link href="/#gallery">Showroom</Link>
             <span className="sep">/</span>
             <Link href="/#gallery">
               {piece.category === 'gowns' ? 'Evening Gowns' : 'Cocktail & Slips'}
             </Link>
             <span className="sep">/</span>
-            <span className="current">{piece.title}</span>
+            <span className="current" data-testid="breadcrumb-current">{piece.title}</span>
           </nav>
 
           <div className="pp-grid">
             <div className="pp-gallery-container">
-              <div className="pp-thumb-rail">
+              <div className="pp-thumb-rail" data-testid="thumb-rail">
                 {lookbookImages.map((imgUrl, index) => (
                   <button
                     key={index}
@@ -476,15 +474,21 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
                     onClick={() => setActiveImageIndex(index)}
                     className={`pp-thumb ${activeImageIndex === index ? 'active' : ''}`}
                     aria-label={`View lookbook angle ${index + 1}`}
+                    data-testid={`thumb-${index}`}
+                    data-active={activeImageIndex === index}
                   >
                     <img src={imgUrl} alt={`${piece.title} angle ${index + 1}`} />
                   </button>
                 ))}
               </div>
 
-              <div className="pp-main-img">
-                <span className="pp-badge">{piece.archiveCode ?? piece.category}</span>
-                <img src={lookbookImages[activeImageIndex]} alt={piece.title} />
+              <div className="pp-main-img" data-testid="main-image-container">
+                <span className="pp-badge" data-testid="product-badge">{piece.archiveCode ?? piece.category}</span>
+                <img
+                  src={lookbookImages[activeImageIndex]}
+                  alt={piece.title}
+                  data-testid="main-image"
+                />
               </div>
             </div>
 
@@ -492,8 +496,8 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
               <span className="pp-eyebrow">
                 {piece.category === 'gowns' ? 'the evening archive' : 'the cocktail silhouette'}
               </span>
-              <h1 className="pp-title">{piece.title}</h1>
-              <p className="pp-subtitle">{piece.subtitle}</p>
+              <h1 className="pp-title" data-testid="product-title">{piece.title}</h1>
+              <p className="pp-subtitle" data-testid="product-subtitle">{piece.subtitle}</p>
 
               <div className="pp-divider" />
 
@@ -501,7 +505,12 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
                 <span>Fitting Size Preference</span>
                 <span>In-Studio Sizing Prep</span>
               </div>
-              <div className="pp-size-grid" role="radiogroup" aria-label="Available studio fitting sizes">
+              <div
+                className="pp-size-grid"
+                role="radiogroup"
+                aria-label="Available studio fitting sizes"
+                data-testid="size-grid"
+              >
                 {sizeOptions.map((size) => (
                   <button
                     key={size}
@@ -510,6 +519,7 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
                     aria-checked={selectedSize === size}
                     onClick={() => setSelectedSize(size)}
                     className={`pp-size-pill ${selectedSize === size ? 'active' : ''}`}
+                    data-testid={`size-option-${size.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {size}
                   </button>
@@ -518,15 +528,17 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
 
               <div className="pp-detail-row">
                 <span>Selected Prep Size</span>
-                <span>{selectedSize}</span>
+                <span data-testid="selected-size">{selectedSize}</span>
               </div>
               <div className="pp-detail-row">
                 <span>Material &amp; Craft</span>
-                <span>{piece.material}</span>
+                <span data-testid="product-material">{piece.material}</span>
               </div>
               <div className="pp-detail-row">
                 <span>Wardrobe Category</span>
-                <span>{piece.category === 'gowns' ? 'Evening Gowns' : 'Cocktail & Slips'}</span>
+                <span data-testid="product-category">
+                  {piece.category === 'gowns' ? 'Evening Gowns' : 'Cocktail & Slips'}
+                </span>
               </div>
               <div className="pp-detail-row">
                 <span>Standard Reservation</span>
@@ -538,6 +550,8 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
                 className="pp-cta"
                 disabled={requested}
                 onClick={() => setRequested(true)}
+                data-testid="request-fitting-button"
+                aria-live="polite"
               >
                 {requested
                   ? `Fitting Request Sent (${selectedSize}) ✓`
@@ -550,7 +564,7 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
             </div>
           </div>
 
-          <section className="pp-style-section">
+          <section className="pp-style-section" data-testid="styled-with-section">
             <div className="pp-style-header">
               <div>
                 <h2>Styled With</h2>
@@ -564,9 +578,14 @@ export default function ProductPage({ params }: { params: ParamsShape }) {
               </Link>
             </div>
 
-            <div className="pp-look-grid">
+            <div className="pp-look-grid" data-testid="styled-with-grid">
               {styledWithList.map((item) => (
-                <Link key={item.id} href={`/products/${item.slug}`} className="look-card">
+                <Link
+                  key={item.id}
+                  href={`/products/${item.slug}`}
+                  className="look-card"
+                  data-testid={`styled-with-card-${item.slug}`}
+                >
                   <div className="look-thumb">
                     <img src={item.image} alt={item.title} />
                   </div>
