@@ -128,8 +128,7 @@ function CoquetteBow({ className = '', width = 36, height = 24, style }: Coquett
   )
 }
 
-// --- TAB ICON SET — matches CoquetteBow's line-art language so every icon
-// renders identically across OS/browser, unlike emoji which vary wildly. ---
+// --- TAB ICON SET — matches CoquetteBow's line-art language ---
 function TabIcon({ name, size = 16 }: { name: 'calendar' | 'mirror' | 'scroll' | 'swan'; size?: number }) {
   const common = {
     width: size,
@@ -218,24 +217,15 @@ export default function RulesPage() {
           --tulle-dot: rgba(184, 107, 125, 0.12);
           --stitch: rgba(184, 107, 125, 0.35);
 
-          /* Layered shadow system: a tight low-opacity "contact" shadow for grounding
-             + a soft wide colored glow for lift, instead of one flat rgba blur everywhere. */
           --shadow-xs: 0 1px 2px rgba(74, 51, 55, 0.06), 0 2px 6px -2px rgba(184, 107, 125, 0.15);
           --shadow-sm: 0 2px 4px rgba(74, 51, 55, 0.07), 0 8px 20px -8px rgba(184, 107, 125, 0.22);
           --shadow-md: 0 4px 8px rgba(74, 51, 55, 0.08), 0 16px 36px -12px rgba(184, 107, 125, 0.28);
           --shadow-lg: 0 6px 14px rgba(74, 51, 55, 0.1), 0 28px 60px -16px rgba(184, 107, 125, 0.32);
-          --shadow-glow-rose: 0 0 0 1px rgba(226, 166, 180, 0.4), 0 10px 28px -10px rgba(184, 107, 125, 0.4);
 
-          /* Distinct pink-family accent per tab, so each section reads as its own
-             "page" of the folder rather than four identical panels with different words. */
           --accent-appointment: #C77B8E;
-          --accent-appointment-tint: #FDF1F4;
           --accent-how: #B86B7D;
-          --accent-how-tint: #FBEAEE;
           --accent-terms: #9C5C6E;
-          --accent-terms-tint: #F7E4E9;
           --accent-reminder: #D391A6;
-          --accent-reminder-tint: #FDF3F6;
         }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -539,59 +529,58 @@ export default function RulesPage() {
           }
         }
         
-        /* Rounded folder tabs, slightly overlapped and stacked by z-index — no
-           clip-path/rotation combo here, since clipping + drop-shadow + opposing
-           rotations on adjacent tabs was producing stray antialiasing slivers
-           at the cut corners (the "point" artifact). */
+        /* Rounded folder tabs with gentle slope (16px 22px 0 0), overlapped by -12px */
         .folder-tab {
-          background: linear-gradient(180deg, #F7ECEF 0%, #F1E2E5 100%);
-          border: 1px solid rgba(184, 107, 125, 0.3);
+          background: #F5EAEC;
+          border: 1px solid rgba(184, 107, 125, 0.35);
           border-bottom: none;
-          padding: 14px 22px 12px;
-          min-height: 46px;
-          border-radius: 14px 14px 0 0;
+          padding: 12px 22px;
+          min-height: 48px;
+          border-radius: 16px 22px 0 0;
           font-family: 'Jost', sans-serif;
-          font-size: .74rem;
+          font-size: .78rem;
           font-weight: 500;
-          letter-spacing: .09em;
+          letter-spacing: .1em;
           text-transform: uppercase;
-          color: var(--ink-body);
+          color: var(--mocha-soft);
           cursor: pointer;
-          transition: background .25s ease, color .25s ease, box-shadow .25s ease, transform .25s ease;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           display: flex;
           align-items: center;
-          gap: 7px;
+          gap: 8px;
           white-space: nowrap;
           flex-shrink: 0;
           scroll-snap-align: start;
           position: relative;
-          margin-left: -8px;
-          box-shadow: 0 -2px 5px -2px rgba(184, 107, 125, 0.12);
+          margin-left: -12px;
+          box-shadow: 0 -2px 6px rgba(184, 107, 125, 0.06);
         }
         .folder-tab:first-child { margin-left: 0; }
         @media (min-width: 480px) {
-          .folder-tab { padding: 16px 28px 14px; font-size: .8rem; letter-spacing: .11em; margin-left: -12px; }
+          .folder-tab { padding: 14px 26px 12px; font-size: .82rem; letter-spacing: .12em; margin-left: -14px; }
         }
         .folder-tab:hover {
-          background: linear-gradient(180deg, #FCEEF1 0%, #F7DEE3 100%);
+          background: #FCEEF1;
           color: var(--mocha);
-          z-index: 5;
         }
         .folder-tab:focus-visible {
           outline: 2px solid var(--rose-deep);
           outline-offset: 2px;
-          z-index: 6;
+          z-index: 12 !important;
         }
+        
+        /* Active tab sits over folder border (border-bottom: 3px solid #FFF7F8) */
         .folder-tab.active {
           background: #FFF7F8;
           color: var(--mocha);
           font-weight: 600;
-          border-color: var(--rose-deep);
-          padding-bottom: 15px;
-          margin-bottom: -1px;
-          transform: translateY(-5px);
-          box-shadow: 0 -10px 18px -8px rgba(184, 107, 125, 0.28);
-          z-index: 10;
+          border: 1px solid var(--rose-deep);
+          border-bottom: 3px solid #FFF7F8;
+          padding-bottom: 16px;
+          margin-bottom: -2px;
+          border-radius: 16px 22px 0 0;
+          box-shadow: 0 -8px 20px -6px rgba(184, 107, 125, 0.18);
+          z-index: 10 !important;
         }
         .folder-tab .tab-icon {
           display: flex;
@@ -627,9 +616,6 @@ export default function RulesPage() {
           .folder-tabs-scroll::after { display: none; }
         }
 
-/* Two plain rotated rectangles peeking out behind the main sheet — reads
-           as a small stack of scrapbook pages without touching clip-path at all,
-           so there's no risk of it warping with content height. */
         .stationery-paper-stack {
           position: relative;
           z-index: 1;
@@ -654,53 +640,40 @@ export default function RulesPage() {
           z-index: -2;
         }
 
+        /* Folder body sits at z-index: 5, above inactive tabs (z-index 1..4), below active tab (z-index 10) */
         .folder-body {
           background: #FFF7F8;
           border: 1px solid var(--rose-deep);
-          border-radius: 18px;
-          padding: clamp(32px, 5vw, 56px);
-          padding-top: clamp(38px, 5.5vw, 60px);
-          padding-bottom: clamp(38px, 5.5vw, 60px);
+          border-radius: 24px;
+          padding: clamp(32px, 5vw, 64px);
           box-shadow: 0 24px 60px -12px rgba(184, 107, 125, 0.2);
           position: relative;
-          z-index: 1;
+          z-index: 5;
           overflow: hidden;
         }
-        /* Torn edge lives ONLY in a fixed-height strip at the very top/bottom —
-           not stretched across the whole box — so it can never scale into a
-           big empty gap regardless of how much content sits between them. */
-        .folder-body::before,
-        .folder-body::after {
-          content: '';
-          position: absolute;
-          left: -2px;
-          right: -2px;
-          height: 16px;
-          background: #FFF7F8;
-          z-index: 2;
-          clip-path: polygon(
-            0% 30%, 3% 0%, 7% 45%, 11% 10%, 15% 55%, 19% 5%, 23% 40%, 27% 0%,
-            31% 50%, 35% 15%, 39% 45%, 43% 0%, 47% 55%, 51% 10%, 55% 40%, 59% 5%,
-            63% 50%, 67% 0%, 71% 45%, 75% 15%, 79% 55%, 83% 0%, 87% 40%, 91% 10%,
-            95% 50%, 100% 0%, 100% 100%, 0% 100%
-          );
+        @media (min-width: 700px) {
+          .folder-body { border-radius: 28px 0 28px 28px; }
         }
         .folder-body::before {
-          top: -1px;
+          content: '';
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 2px;
+          background-image: linear-gradient(90deg, var(--stitch) 50%, transparent 50%);
+          background-size: 10px 2px;
+          z-index: 2;
         }
-        .folder-body::after {
-          bottom: -1px;
-          transform: rotate(180deg);
-        }
-        /* Faint paper-grain dots reused from the tulle overlay for texture */
+
         .folder-inner-lace {
           position: absolute;
-          inset: 0;
-          background-image: radial-gradient(var(--tulle-dot) 1px, transparent 1px);
-          background-size: 14px 14px;
-          opacity: 0.45;
+          inset: 12px;
+          border: 1px dashed rgba(226, 166, 180, 0.35);
+          border-radius: 16px;
           pointer-events: none;
-          z-index: 0;
+          z-index: 1;
+        }
+        @media (min-width: 700px) {
+          .folder-inner-lace { border-radius: 16px 0 16px 16px; }
         }
 
         .folder-watermark {
@@ -750,13 +723,12 @@ export default function RulesPage() {
           letter-spacing: .04em;
         }
 
-.stationery-grid {
+        .stationery-grid {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
           gap: clamp(18px, 2.5vw, 32px);
           position: relative;
           z-index: 2;
-          margin-bottom: clamp(8px, 2vw, 16px);
         }
         .stationery-item {
           background: #FFFFFF;
@@ -989,7 +961,10 @@ export default function RulesPage() {
                     onClick={() => setActiveTab(tab.key)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
                     className={`folder-tab ${activeTab === tab.key ? 'active' : ''}`}
-                    style={{ '--tab-accent': `var(--accent-${tab.key})` } as React.CSSProperties}
+                    style={{
+                      '--tab-accent': `var(--accent-${tab.key})`,
+                      zIndex: activeTab === tab.key ? 10 : TABS.length - index,
+                    } as React.CSSProperties}
                   >
                     <span className="tab-icon"><TabIcon name={tab.icon} size={15} /></span>
                     <span className="num">{tab.num}</span> {tab.label}
@@ -998,7 +973,7 @@ export default function RulesPage() {
               </div>
             </div>
 
-<div className="stationery-paper-stack">
+            <div className="stationery-paper-stack">
               <div className="folder-body">
                 <div className="folder-inner-lace" aria-hidden="true" />
                 <div className="folder-watermark" aria-hidden="true">
