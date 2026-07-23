@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, KeyboardEvent } from 'react'
 import Link from 'next/link'
 import Navbar from '@/app/components/Navbar'
 import Footer from '@/app/components/Footer'
@@ -10,6 +10,8 @@ interface StepItem {
   title: string
   desc: string
 }
+
+const HERO_IMAGE = 'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&w=2200&q=80'
 
 // --- CURATED RULES & GUIDELINES DATA ---
 const HOW_TO_RENT_STEPS: StepItem[] = [
@@ -78,92 +80,371 @@ const ROW_TWO = [
 
 const doubled = <T,>(arr: readonly T[]) => [...arr, ...arr]
 
+const TABS = [
+  { key: 'appointment', label: 'Appointment', num: '01', icon: 'calendar' as const },
+  { key: 'how', label: 'How to Rent', num: '02', icon: 'mirror' as const },
+  { key: 'terms', label: 'Terms', num: '03', icon: 'scroll' as const },
+  { key: 'reminder', label: 'Reminder', num: '04', icon: 'swan' as const },
+] as const
+
+type TabKey = typeof TABS[number]['key']
+
+interface CoquetteBowProps {
+  className?: string
+  width?: number
+  height?: number
+  style?: React.CSSProperties
+}
+
+// --- INLINE COQUETTE BOW SVG COMPONENT ---
+function CoquetteBow({ className = '', width = 36, height = 24, style }: CoquetteBowProps) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 48 32"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      style={style}
+      aria-hidden="true"
+    >
+      <path
+        d="M24 16C18 8 6 6 4 14C2 22 14 24 24 16ZM24 16C30 8 42 6 44 14C46 22 34 24 24 16Z"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="rgba(253, 242, 245, 0.6)"
+      />
+      <path
+        d="M24 16C21 22 15 28 10 30M24 16C27 22 33 28 38 30"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="24" cy="16" r="3.5" fill="currentColor" />
+    </svg>
+  )
+}
+
+// --- TAB ICON SET — matches CoquetteBow's line-art language so every icon
+// renders identically across OS/browser, unlike emoji which vary wildly. ---
+function TabIcon({ name, size = 16 }: { name: 'calendar' | 'mirror' | 'scroll' | 'swan'; size?: number }) {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: '0 0 24 24',
+    fill: 'none' as const,
+    stroke: 'currentColor',
+    strokeWidth: 1.6,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true,
+  }
+  switch (name) {
+    case 'calendar':
+      return (
+        <svg {...common}>
+          <rect x="3.5" y="5" width="17" height="15" rx="3" />
+          <path d="M3.5 9.5h17M8 3v3.5M16 3v3.5" />
+          <circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none" />
+        </svg>
+      )
+    case 'mirror':
+      return (
+        <svg {...common}>
+          <path d="M12 3c4 0 6.5 3.4 6.5 7.5S16 20 12 20s-6.5-5.4-6.5-9.5S8 3 12 3Z" />
+          <path d="M12 20v1.6M9 21.6h6" />
+        </svg>
+      )
+    case 'scroll':
+      return (
+        <svg {...common}>
+          <path d="M6 4h9a2.5 2.5 0 0 1 2.5 2.5V19a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4Z" />
+          <path d="M6 4a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2M9 9h6M9 13h6" />
+        </svg>
+      )
+    case 'swan':
+      return (
+        <svg {...common}>
+          <path d="M4 18c2-.5 3.5-1.6 4.4-3.2C5.8 13 5 10.6 6.4 8.6 7.8 6.6 10.6 6 12.6 7.2c1 .6 1.6 1.6 1.7 2.7.9-.3 1.9-.1 2.6.6.9.9.9 2.3 0 3.2l-2.4 2.4c-1.4 1.4-3.4 2-5.3 1.6L4 18Z" />
+          <circle cx="9.6" cy="9.6" r="0.7" fill="currentColor" stroke="none" />
+        </svg>
+      )
+  }
+}
+
 export default function RulesPage() {
-  const [activeTab, setActiveTab] = useState<'appointment' | 'how' | 'terms' | 'reminder'>('appointment')
+  const [activeTab, setActiveTab] = useState<TabKey>('appointment')
+  const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({
+    appointment: null,
+    how: null,
+    terms: null,
+    reminder: null,
+  })
+
+  const focusTab = (key: TabKey) => {
+    setActiveTab(key)
+    tabRefs.current[key]?.focus()
+  }
+
+  const handleTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return
+    e.preventDefault()
+    let nextIndex = index
+    if (e.key === 'ArrowRight') nextIndex = (index + 1) % TABS.length
+    if (e.key === 'ArrowLeft') nextIndex = (index - 1 + TABS.length) % TABS.length
+    if (e.key === 'Home') nextIndex = 0
+    if (e.key === 'End') nextIndex = TABS.length - 1
+    focusTab(TABS[nextIndex].key)
+  }
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&family=Parisienne&display=swap');
-        
-        :root {
-          --porcelain: #FFFDF9;
-          --card: #FFFFFF;
-          --rose: #D48B9D;
-          --rose-deep: #A9647C;
-          --mocha: #3D2C2E;
-          --mocha-soft: #7A5B51;
-          --line: #F2E6E8;
-          --blush-ribbon: #FDF2F5;
-        }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        :root {
+          --porcelain: #FFFBF7;
+          --card: #FFFFFF;
+          --rose: #E2A6B4;
+          --rose-deep: #B86B7D;
+          --mocha: #4A3337;
+          --mocha-soft: #8C666B;
+          --ink-body: #6B484D;
+          --line: #F7E8EC;
+          --blush-ribbon: #FDF2F5;
+          --tulle-dot: rgba(184, 107, 125, 0.12);
+          --stitch: rgba(184, 107, 125, 0.35);
+
+          /* Layered shadow system: a tight low-opacity "contact" shadow for grounding
+             + a soft wide colored glow for lift, instead of one flat rgba blur everywhere. */
+          --shadow-xs: 0 1px 2px rgba(74, 51, 55, 0.06), 0 2px 6px -2px rgba(184, 107, 125, 0.15);
+          --shadow-sm: 0 2px 4px rgba(74, 51, 55, 0.07), 0 8px 20px -8px rgba(184, 107, 125, 0.22);
+          --shadow-md: 0 4px 8px rgba(74, 51, 55, 0.08), 0 16px 36px -12px rgba(184, 107, 125, 0.28);
+          --shadow-lg: 0 6px 14px rgba(74, 51, 55, 0.1), 0 28px 60px -16px rgba(184, 107, 125, 0.32);
+          --shadow-glow-rose: 0 0 0 1px rgba(226, 166, 180, 0.4), 0 10px 28px -10px rgba(184, 107, 125, 0.4);
+
+          /* Distinct pink-family accent per tab, so each section reads as its own
+             "page" of the folder rather than four identical panels with different words. */
+          --accent-appointment: #C77B8E;
+          --accent-appointment-tint: #FDF1F4;
+          --accent-how: #B86B7D;
+          --accent-how-tint: #FBEAEE;
+          --accent-terms: #9C5C6E;
+          --accent-terms-tint: #F7E4E9;
+          --accent-reminder: #D391A6;
+          --accent-reminder-tint: #FDF3F6;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
           background: var(--porcelain);
           color: var(--mocha);
           font-family: 'Jost', sans-serif;
           font-weight: 300;
-          line-height: 1.6;
+          line-height: 1.65;
           -webkit-font-smoothing: antialiased;
           overflow-x: hidden;
         }
-
         .eyebrow {
           font-family: 'Parisienne', cursive;
-          font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+          font-size: clamp(1.6rem, 2.5vw, 2.2rem);
           color: var(--rose-deep);
           display: inline-block;
           margin-bottom: .25rem;
         }
-
         h1, h2, h3 {
           font-family: 'Cormorant Garamond', serif;
           font-weight: 500;
           color: var(--mocha);
           line-height: 1.08;
         }
-
         a { color: inherit; text-decoration: none; }
-        
-        .full-wrap { 
-          width: 100%; 
-          max-width: 1920px; 
-          margin: 0 auto; 
-          padding: 0 clamp(24px, 5vw, 80px); 
+
+        .full-wrap {
+          width: 100%;
+          max-width: 1920px;
+          margin: 0 auto;
+          padding: 0 clamp(20px, 5vw, 80px);
         }
 
-        /* --- HERO SECTION --- */
-        .hero { 
-          min-height: calc(75vh - 84px);
+        /* --- ROMANTIC TULLE HERO SECTION --- */
+        .gg-hero {
+          position: relative;
+          min-height: calc(85vh - 84px);
           display: flex;
-          align-items: center; 
-          position: relative; 
-          padding: 40px 0 60px;
-          text-align: center;
+          flex-direction: column;
+          overflow: hidden;
+          background: var(--porcelain);
         }
-        .hero .full-wrap { 
-          max-width: 900px;
-          margin: 0 auto;
+        .gg-hero-photo {
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(180deg, rgba(255,251,247,.95) 0%, rgba(255,251,247,.82) 50%, rgba(255,251,247,.98) 100%),
+            url('${HERO_IMAGE}');
+          background-size: cover;
+          background-position: center 30%;
+          filter: saturate(0.8) brightness(1.03);
+          z-index: 0;
+        }
+        .gg-tulle-overlay {
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(var(--tulle-dot) 1.5px, transparent 1.5px);
+          background-size: 16px 16px;
+          z-index: 1;
+          pointer-events: none;
+        }
+        .gg-blush-glow {
+          position: absolute;
+          width: 60vw;
+          height: 60vw;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(253, 242, 245, 0.8) 0%, rgba(253, 242, 245, 0) 70%);
+          top: -10vw;
+          left: 20vw;
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        .gg-hero-main {
+          position: relative;
+          z-index: 3;
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: clamp(40px, 8vh, 80px) clamp(24px, 5vw, 64px) clamp(30px, 5vh, 50px);
+        }
+        .gg-hero-content { max-width: 780px; display: flex; flex-direction: column; align-items: center; }
+
+        .gg-eyebrow-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 22px;
+          border-radius: 999px;
+          border: 1px dashed var(--rose);
+          background: rgba(255,255,255,.75);
+          backdrop-filter: blur(8px);
+          font-size: .75rem;
+          font-weight: 500;
+          letter-spacing: .16em;
+          text-transform: uppercase;
+          color: var(--rose-deep);
+          margin-bottom: 24px;
+          box-shadow: var(--shadow-xs);
+        }
+
+        .gg-hero-content h1 {
+          font-family: 'Cormorant Garamond', serif;
+          font-weight: 500;
+          font-style: italic;
+          font-size: clamp(3rem, 6.8vw, 5.6rem);
+          line-height: 1.05;
+          color: var(--mocha);
+          margin-bottom: 22px;
+          letter-spacing: -.01em;
+        }
+        .gg-hero-content h1 .accent {
+          display: block;
+          color: var(--rose-deep);
+          font-weight: 600;
+        }
+        .gg-hero-content p.lead {
+          font-family: 'Jost', sans-serif;
+          font-weight: 300;
+          font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+          color: var(--mocha-soft);
+          line-height: 1.8;
+          max-width: 580px;
+          margin: 0 auto 40px;
+        }
+        
+        .gg-hero-cta-row {
+          display: flex;
+          gap: 18px;
+          justify-content: center;
+          flex-wrap: wrap;
+          margin-bottom: 52px;
+        }
+        .gg-btn {
+          font-family: 'Jost', sans-serif;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          padding: 16px 36px;
+          border-radius: 999px;
+          font-size: .82rem;
+          font-weight: 500;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+          text-decoration: none;
+          cursor: pointer;
+          transition: all .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .gg-btn-primary {
+          background: var(--mocha);
+          color: #fff;
+          box-shadow: 0 3px 6px rgba(74, 51, 55, 0.25), 0 14px 28px -8px rgba(74, 51, 55, 0.35);
+        }
+        .gg-btn-primary:hover {
+          background: var(--rose-deep);
+          transform: translateY(-3px);
+          box-shadow: 0 4px 10px rgba(74, 51, 55, 0.2), 0 20px 38px -8px rgba(184, 107, 125, 0.55);
+        }
+        .gg-btn-ghost {
+          border: 1px dashed var(--rose-deep);
+          color: var(--mocha);
+          background: rgba(255,255,255,.7);
+          backdrop-filter: blur(6px);
+          box-shadow: var(--shadow-xs);
+        }
+        .gg-btn-ghost:hover {
+          background: var(--blush-ribbon);
+          border-style: solid;
+          color: var(--rose-deep);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-sm);
+        }
+        .gg-btn:focus-visible {
+          outline: 2px solid var(--rose-deep);
+          outline-offset: 3px;
+        }
+
+        .gg-trust-row {
+          display: flex;
+          gap: clamp(18px, 3.5vw, 40px);
+          justify-content: center;
+          flex-wrap: wrap;
+          font-size: .8rem;
+          color: var(--mocha-soft);
+          letter-spacing: .05em;
+          font-weight: 400;
+        }
+        .gg-trust-row span {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .gg-trust-row span.heart { color: var(--rose-deep); font-size: 0.9rem; }
+
+        .gg-scroll-hint {
+          position: relative;
+          z-index: 3;
           display: flex;
           flex-direction: column;
           align-items: center;
-        }
-        .hero h1 { 
-          font-size: clamp(3.2rem, 6.5vw, 5.8rem); 
-          font-style: italic; 
-          letter-spacing: -0.01em; 
-          margin-bottom: 20px; 
-          font-weight: 500; 
-        }
-        .hero h1 em { color: var(--rose-deep); font-style: italic; font-weight: 600; }
-        .hero p.lead { 
-          font-size: clamp(1.1rem, 1.5vw, 1.35rem); 
-          color: var(--mocha-soft); 
-          max-width: 640px; 
-          margin-bottom: 36px; 
-          font-weight: 300; 
-          line-height: 1.7; 
+          gap: 10px;
+          padding-bottom: clamp(24px, 4vh, 40px);
+          color: var(--mocha-soft);
+          font-size: .7rem;
+          letter-spacing: .18em;
+          text-transform: uppercase;
         }
 
         /* --- DUAL-ROW DRIFTING MARQUEE --- */
@@ -173,7 +454,9 @@ export default function RulesPage() {
           overflow: hidden;
           position: relative;
           padding: 0;
-          margin-bottom: 80px;
+          margin-bottom: clamp(48px, 8vw, 80px);
+          border-top: 2px solid var(--rose);
+          border-bottom: 2px solid var(--rose);
         }
         .dual-marquee-row {
           display: flex;
@@ -183,10 +466,10 @@ export default function RulesPage() {
           position: relative;
         }
         .dual-marquee-row:first-child {
-          border-bottom: 1px solid rgba(212, 139, 157, 0.2);
+          border-bottom: 1px dashed rgba(226, 166, 180, 0.25);
         }
-        .dual-marquee-row:first-child .dual-track { animation: drift-left 28s linear infinite; }
-        .dual-marquee-row:last-child  .dual-track { animation: drift-right 34s linear infinite; }
+        .dual-marquee-row:first-child .dual-track { animation: drift-left 34s linear infinite; }
+        .dual-marquee-row:last-child  .dual-track { animation: drift-right 40s linear infinite; }
         .dual-track {
           display: inline-flex;
           align-items: center;
@@ -204,102 +487,229 @@ export default function RulesPage() {
         }
         .dual-word {
           font-family: 'Cormorant Garamond', serif;
-          font-size: clamp(0.8rem, 1.1vw, 1rem);
+          font-size: clamp(0.78rem, 1.1vw, 1.05rem);
           font-weight: 500;
-          letter-spacing: 0.22em;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          padding: 0 32px;
+          padding: 0 clamp(16px, 2.5vw, 32px);
         }
         .dual-word.serif-reg { font-style: normal; color: var(--blush-ribbon); }
-        .dual-word.serif-ital { font-style: italic; color: var(--rose); font-size: clamp(0.9rem, 1.2vw, 1.1rem); font-weight: 400; }
+        .dual-word.serif-ital { font-style: italic; color: var(--rose); font-size: clamp(0.85rem, 1.2vw, 1.15rem); font-weight: 400; }
         .dual-sep {
-          display: inline-block; width: 3px; height: 3px; border-radius: 50%;
-          background: rgba(212, 139, 157, 0.5); flex-shrink: 0;
+          display: inline-block; color: var(--rose); font-size: 0.75rem; flex-shrink: 0; opacity: 0.7;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .dual-track { animation: none !important; }
         }
 
-        /* --- STATIONERY FOLDER (COQUETTE FOLDER STYLE) --- */
+        /* --- ATELIER SCRAPBOOK FOLDER --- */
         .stationery-section {
-          padding: 0 0 120px;
+          padding: 0 0 clamp(70px, 10vw, 120px);
           background: var(--porcelain);
+          position: relative;
         }
         .stationery-container {
           max-width: 1080px;
           margin: 0 auto;
           position: relative;
         }
-        
+
+        .folder-tabs-scroll {
+          position: relative;
+          z-index: 2;
+        }
         .folder-tabs {
           display: flex;
           justify-content: flex-start;
-          gap: 6px;
-          padding: 0 16px;
-          position: relative;
-          z-index: 2;
-          flex-wrap: wrap;
+          align-items: flex-end;
+          gap: 0;
+          padding: 0 8px;
+          overflow-x: auto;
+          overflow-y: visible;
+          scroll-snap-type: x proximity;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
         }
-        @media (min-width: 768px) {
-          .folder-tabs { justify-content: flex-end; }
+        .folder-tabs::-webkit-scrollbar { display: none; }
+        @media (min-width: 700px) {
+          .folder-tabs {
+            justify-content: flex-end;
+            overflow-x: visible;
+            padding: 0 20px;
+          }
         }
-
+        
+        /* Rounded folder tabs, slightly overlapped and stacked by z-index — no
+           clip-path/rotation combo here, since clipping + drop-shadow + opposing
+           rotations on adjacent tabs was producing stray antialiasing slivers
+           at the cut corners (the "point" artifact). */
         .folder-tab {
-          background: #EFE4E6;
-          border: 1px solid rgba(212, 139, 157, 0.3);
+          background: linear-gradient(180deg, #F7ECEF 0%, #F1E2E5 100%);
+          border: 1px solid rgba(184, 107, 125, 0.3);
           border-bottom: none;
-          padding: 12px 24px;
+          padding: 14px 22px 12px;
+          min-height: 46px;
           border-radius: 14px 14px 0 0;
           font-family: 'Jost', sans-serif;
-          font-size: .8rem;
+          font-size: .74rem;
           font-weight: 500;
-          letter-spacing: .12em;
+          letter-spacing: .09em;
           text-transform: uppercase;
-          color: var(--mocha-soft);
+          color: var(--ink-body);
           cursor: pointer;
-          transition: all 0.25s ease;
+          transition: background .25s ease, color .25s ease, box-shadow .25s ease, transform .25s ease;
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 7px;
+          white-space: nowrap;
+          flex-shrink: 0;
+          scroll-snap-align: start;
+          position: relative;
+          margin-left: -8px;
+          box-shadow: 0 -2px 5px -2px rgba(184, 107, 125, 0.12);
         }
-        .folder-tab:hover { background: #F7EDE8; color: var(--mocha); }
+        .folder-tab:first-child { margin-left: 0; }
+        @media (min-width: 480px) {
+          .folder-tab { padding: 16px 28px 14px; font-size: .8rem; letter-spacing: .11em; margin-left: -12px; }
+        }
+        .folder-tab:hover {
+          background: linear-gradient(180deg, #FCEEF1 0%, #F7DEE3 100%);
+          color: var(--mocha);
+          z-index: 5;
+        }
+        .folder-tab:focus-visible {
+          outline: 2px solid var(--rose-deep);
+          outline-offset: 2px;
+          z-index: 6;
+        }
         .folder-tab.active {
-          background: #F7C8D8;
+          background: #FFF7F8;
           color: var(--mocha);
           font-weight: 600;
-          padding-bottom: 14px;
-          margin-bottom: -2px;
-          border-color: var(--rose);
-          box-shadow: 0 -4px 12px rgba(169, 100, 124, 0.08);
+          border-color: var(--rose-deep);
+          padding-bottom: 15px;
+          margin-bottom: -1px;
+          transform: translateY(-5px);
+          box-shadow: 0 -10px 18px -8px rgba(184, 107, 125, 0.28);
+          z-index: 10;
+        }
+        .folder-tab .tab-icon {
+          display: flex;
+          color: var(--rose-deep);
+          opacity: 0.75;
+          transition: opacity .25s ease;
+        }
+        .folder-tab.active .tab-icon,
+        .folder-tab:hover .tab-icon {
+          opacity: 1;
         }
         .folder-tab span.num {
           font-family: 'Cormorant Garamond', serif;
           font-style: italic;
-          font-size: 1.1rem;
-          color: var(--rose-deep);
+          font-size: 1.05rem;
+          color: var(--mocha-soft);
           font-weight: 600;
+          display: none;
+        }
+        .folder-tab.active span.num { color: var(--tab-accent, var(--rose-deep)); }
+        @media (min-width: 480px) {
+          .folder-tab span.num { display: inline; }
+        }
+        .folder-tabs-scroll::after {
+          content: '';
+          position: absolute;
+          top: 0; right: 0; bottom: 0;
+          width: 32px;
+          background: linear-gradient(to left, var(--porcelain), transparent);
+          pointer-events: none;
+        }
+        @media (min-width: 700px) {
+          .folder-tabs-scroll::after { display: none; }
+        }
+
+/* Two plain rotated rectangles peeking out behind the main sheet — reads
+           as a small stack of scrapbook pages without touching clip-path at all,
+           so there's no risk of it warping with content height. */
+        .stationery-paper-stack {
+          position: relative;
+          z-index: 1;
+        }
+        .stationery-paper-stack::before,
+        .stationery-paper-stack::after {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 18px;
+          border: 1px solid rgba(226, 166, 180, 0.5);
+          pointer-events: none;
+        }
+        .stationery-paper-stack::before {
+          background: #F8E4E9;
+          transform: rotate(-1.1deg) translateY(3px);
+          z-index: -1;
+        }
+        .stationery-paper-stack::after {
+          background: #FCF1F3;
+          transform: rotate(0.8deg) translateY(2px);
+          z-index: -2;
         }
 
         .folder-body {
-          background: #FDF4F6;
-          border: 1px solid var(--rose);
-          border-radius: 0 24px 24px 24px;
-          padding: clamp(32px, 5vw, 64px);
-          box-shadow: 0 20px 50px -10px rgba(61, 44, 46, 0.08);
+          background: #FFF7F8;
+          border: 1px solid var(--rose-deep);
+          border-radius: 18px;
+          padding: clamp(32px, 5vw, 56px);
+          padding-top: clamp(38px, 5.5vw, 60px);
+          padding-bottom: clamp(38px, 5.5vw, 60px);
+          box-shadow: 0 24px 60px -12px rgba(184, 107, 125, 0.2);
           position: relative;
           z-index: 1;
           overflow: hidden;
         }
-        @media (min-width: 768px) {
-          .folder-body { border-radius: 24px 0 24px 24px; }
+        /* Torn edge lives ONLY in a fixed-height strip at the very top/bottom —
+           not stretched across the whole box — so it can never scale into a
+           big empty gap regardless of how much content sits between them. */
+        .folder-body::before,
+        .folder-body::after {
+          content: '';
+          position: absolute;
+          left: -2px;
+          right: -2px;
+          height: 16px;
+          background: #FFF7F8;
+          z-index: 2;
+          clip-path: polygon(
+            0% 30%, 3% 0%, 7% 45%, 11% 10%, 15% 55%, 19% 5%, 23% 40%, 27% 0%,
+            31% 50%, 35% 15%, 39% 45%, 43% 0%, 47% 55%, 51% 10%, 55% 40%, 59% 5%,
+            63% 50%, 67% 0%, 71% 45%, 75% 15%, 79% 55%, 83% 0%, 87% 40%, 91% 10%,
+            95% 50%, 100% 0%, 100% 100%, 0% 100%
+          );
+        }
+        .folder-body::before {
+          top: -1px;
+        }
+        .folder-body::after {
+          bottom: -1px;
+          transform: rotate(180deg);
+        }
+        /* Faint paper-grain dots reused from the tulle overlay for texture */
+        .folder-inner-lace {
+          position: absolute;
+          inset: 0;
+          background-image: radial-gradient(var(--tulle-dot) 1px, transparent 1px);
+          background-size: 14px 14px;
+          opacity: 0.45;
+          pointer-events: none;
+          z-index: 0;
         }
 
         .folder-watermark {
           position: absolute;
-          bottom: 20px;
-          right: 20px;
-          width: 180px;
-          height: 180px;
+          bottom: 16px; right: 24px;
+          width: 140px; height: 140px;
           border-radius: 50%;
-          background: rgba(212, 139, 157, 0.12);
-          border: 2px solid rgba(212, 139, 157, 0.25);
+          background: radial-gradient(circle, rgba(226, 166, 180, 0.15) 0%, transparent 70%);
+          border: 1px dashed rgba(184, 107, 125, 0.25);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -309,56 +719,69 @@ export default function RulesPage() {
         }
         .folder-watermark span {
           font-family: 'Parisienne', cursive;
-          font-size: 4.5rem;
-          color: rgba(169, 100, 124, 0.18);
+          font-size: 3.2rem;
+          color: rgba(184, 107, 125, 0.18);
+        }
+        @media (min-width: 700px) {
+          .folder-watermark { width: 200px; height: 200px; bottom: 24px; right: 32px; }
+          .folder-watermark span { font-size: 5rem; }
         }
 
         .stationery-header {
           text-align: center;
-          margin-bottom: 48px;
+          margin-bottom: clamp(36px, 5vw, 56px);
           position: relative;
           z-index: 2;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
         .stationery-header h3 {
           font-family: 'Parisienne', cursive;
-          font-size: clamp(2.6rem, 4.5vw, 3.8rem);
+          font-size: clamp(2.4rem, 6vw, 4.2rem);
           color: var(--rose-deep);
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         .stationery-header p {
           font-family: 'Cormorant Garamond', serif;
           font-style: italic;
-          font-size: 1.25rem;
+          font-size: clamp(1.1rem, 2vw, 1.35rem);
           color: var(--mocha-soft);
           letter-spacing: .04em;
         }
 
-        .stationery-grid {
+.stationery-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 28px;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: clamp(18px, 2.5vw, 32px);
           position: relative;
           z-index: 2;
+          margin-bottom: clamp(8px, 2vw, 16px);
         }
         .stationery-item {
-          background: rgba(255, 253, 249, 0.75);
-          border: 1px solid rgba(242, 230, 232, 0.8);
-          padding: 24px;
-          border-radius: 18px;
-          transition: transform 0.2s ease, border-color 0.2s ease;
+          background: #FFFFFF;
+          border: 1px solid rgba(226, 166, 180, 0.5);
+          padding: clamp(20px, 3vw, 28px);
+          border-radius: 20px;
+          transition: transform 0.25s ease, box-shadow 0.25s ease, border-color .25s ease;
+          position: relative;
+          box-shadow: var(--shadow-xs);
         }
         .stationery-item:hover {
-          transform: translateY(-3px);
-          border-color: var(--rose);
+          transform: translateY(-4px);
+          box-shadow: var(--shadow-sm);
+          border-color: var(--tab-accent, var(--rose-deep));
         }
         .stationery-item .step-num {
           font-family: 'Cormorant Garamond', serif;
           font-style: italic;
-          font-size: 1.8rem;
+          font-size: 1.7rem;
           font-weight: 600;
-          color: var(--rose-deep);
-          display: block;
-          margin-bottom: 6px;
+          color: var(--tab-accent, var(--rose-deep));
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 10px;
         }
         .stationery-item h4 {
           font-family: 'Cormorant Garamond', serif;
@@ -366,38 +789,48 @@ export default function RulesPage() {
           font-weight: 600;
           margin-bottom: 8px;
           color: var(--mocha);
+          line-height: 1.25;
         }
         .stationery-item p {
-          font-size: .9rem;
-          color: var(--mocha-soft);
-          line-height: 1.6;
+          font-size: .93rem;
+          color: var(--ink-body);
+          line-height: 1.7;
         }
 
         .stationery-list {
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          gap: clamp(16px, 2vw, 22px);
           position: relative;
           z-index: 2;
         }
         .stationery-list li {
-          background: rgba(255, 253, 249, 0.75);
-          border: 1px solid rgba(242, 230, 232, 0.8);
-          padding: 20px 24px;
-          border-radius: 16px;
+          background: #FFFFFF;
+          border: 1px solid rgba(226, 166, 180, 0.5);
+          padding: clamp(18px, 2.5vw, 24px) clamp(20px, 3vw, 28px);
+          border-radius: 18px;
+          box-shadow: var(--shadow-xs);
+          transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .stationery-list li:hover {
+          border-color: var(--tab-accent, var(--rose-deep));
+          box-shadow: var(--shadow-sm);
         }
         .stationery-list h4 {
           font-family: 'Cormorant Garamond', serif;
           font-size: 1.25rem;
           font-weight: 600;
-          color: var(--rose-deep);
-          margin-bottom: 6px;
+          color: var(--tab-accent, var(--rose-deep));
+          margin-bottom: 7px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
         .stationery-list p {
-          font-size: .92rem;
-          color: var(--mocha-soft);
-          line-height: 1.6;
+          font-size: .95rem;
+          color: var(--ink-body);
+          line-height: 1.7;
         }
 
         .stationery-prose {
@@ -408,11 +841,10 @@ export default function RulesPage() {
           z-index: 2;
         }
         .stationery-prose p.intro {
-          font-size: 1.05rem;
+          font-size: clamp(1rem, 1.5vw, 1.1rem);
           color: var(--mocha);
-          line-height: 1.8;
-          margin-bottom: 32px;
-          font-weight: 400;
+          line-height: 1.85;
+          margin-bottom: clamp(28px, 4vw, 36px);
         }
         .stationery-prose ul {
           list-style: none;
@@ -420,68 +852,105 @@ export default function RulesPage() {
           flex-direction: column;
           gap: 16px;
           text-align: left;
-          margin-bottom: 40px;
+          margin-bottom: clamp(32px, 4vw, 44px);
         }
         .stationery-prose li {
           display: flex;
           align-items: flex-start;
-          gap: 12px;
-          font-size: .95rem;
-          color: var(--mocha-soft);
-          line-height: 1.6;
-          background: rgba(255, 253, 249, 0.75);
-          padding: 16px 20px;
-          border-radius: 12px;
-          border: 1px solid rgba(242, 230, 232, 0.8);
+          gap: 14px;
+          font-size: .96rem;
+          color: var(--ink-body);
+          line-height: 1.7;
+          background: #FFFFFF;
+          padding: 16px 22px;
+          border-radius: 16px;
+          border: 1px solid rgba(226, 166, 180, 0.5);
+          box-shadow: var(--shadow-xs);
         }
         .stationery-prose li::before {
-          content: '✦';
-          color: var(--rose-deep);
-          font-size: 0.8rem;
-          margin-top: 3px;
+          content: '♡';
+          color: var(--tab-accent, var(--rose-deep));
+          font-size: 1rem;
+          margin-top: 1px;
+          flex-shrink: 0;
         }
         .stationery-prose .outro {
           font-family: 'Cormorant Garamond', serif;
           font-style: italic;
-          font-size: 1.4rem;
+          font-size: clamp(1.2rem, 2vw, 1.45rem);
           color: var(--mocha);
-          margin-bottom: 8px;
+          margin-bottom: 12px;
         }
         .stationery-prose .sign-off {
           font-family: 'Parisienne', cursive;
-          font-size: 2.2rem;
-          color: var(--rose-deep);
+          font-size: clamp(2rem, 3.5vw, 2.6rem);
+          color: var(--tab-accent, var(--rose-deep));
         }
 
-        @media (max-width: 1024px) {
-          .hero .full-wrap { padding-top: 10px; }
-          .hero p.lead { margin-left: auto; margin-right: auto; }
+        @media (max-width: 640px) {
+          .gg-hero { min-height: 100vh; }
+          .gg-trust-row { gap: 12px 20px; }
+          .gg-hero-cta-row { flex-direction: column; width: 100%; }
+          .gg-hero-cta-row .gg-btn { width: 100%; justify-content: center; }
         }
       `}</style>
 
       <Navbar />
 
-      {/* --- HERO SECTION (RULES FOCUS) --- */}
-      <section className="hero">
-        <div className="full-wrap">
-          <span className="eyebrow">studio policies</span>
-          <h1>
-            Rules &amp; <em>Guidelines</em>
-          </h1>
-          <p className="lead">
-            Everything you need to know about our fitting appointments, rental policies, and garment care instructions. Please review our studio standards prior to your visit.
-          </p>
+      {/* --- ROMANTIC TULLE HERO SECTION --- */}
+      <section className="gg-hero">
+        <div className="gg-hero-photo" aria-hidden="true" />
+        <div className="gg-tulle-overlay" aria-hidden="true" />
+        <div className="gg-blush-glow" aria-hidden="true" />
+
+        <div className="gg-hero-main">
+          <div className="gg-hero-content">
+            <span className="gg-eyebrow-pill">
+              <CoquetteBow width={22} height={14} style={{ color: 'var(--rose-deep)' }} />
+              modern vietnamese rental atelier
+            </span>
+
+            <h1>
+              Dress rentals,
+              <span className="accent">reimagined with grace.</span>
+            </h1>
+
+            <p className="lead">
+              Gigi&apos;s Rentals is an intimate atelier for custom-fitted gowns and cocktail
+              silhouettes — every piece tailored just for you through private appointments. Explore our studio etiquette and care standards below.
+            </p>
+
+            <div className="gg-hero-cta-row">
+              <Link href="#guidelines" className="gg-btn gg-btn-primary" onClick={() => setActiveTab('appointment')}>
+                Explore Studio Rules
+              </Link>
+              <Link href="#guidelines" className="gg-btn gg-btn-ghost" onClick={() => setActiveTab('how')}>
+                Rental Etiquette
+              </Link>
+            </div>
+
+            <div className="gg-trust-row">
+              <span><span className="heart">♡</span> Bespoke Fitted Only</span>
+              <span><span className="heart">♡</span> Private Showroom</span>
+              <span><span className="heart">♡</span> Steamed &amp; Dry Cleaned</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="gg-scroll-hint" aria-hidden="true">
+          <span>Scroll to Etiquette</span>
+          <CoquetteBow width={24} height={16} style={{ opacity: 0.7, marginTop: -4 }} />
         </div>
       </section>
 
-      {/* --- DUAL-ROW DRIFTING MARQUEE --- */}
+      {/* --- DUAL-ROW DRIFTING MARQUEE (COQUETTE SYMBOLS) --- */}
       <div className="dual-marquee" aria-hidden="true">
         <div className="dual-marquee-row">
           <div className="dual-track">
             {doubled(ROW_ONE).map((item, i) => (
               <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
                 <span className={`dual-word ${item.style}`}>{item.text}</span>
-                <span className="dual-sep" />
+                <span className="dual-sep">❀</span>
               </span>
             ))}
           </div>
@@ -491,150 +960,136 @@ export default function RulesPage() {
             {doubled(ROW_TWO).map((item, i) => (
               <span key={i} style={{ display: 'inline-flex', alignItems: 'center' }}>
                 <span className={`dual-word ${item.style}`}>{item.text}</span>
-                <span className="dual-sep" />
+                <span className="dual-sep">♡</span>
               </span>
             ))}
           </div>
         </div>
       </div>
 
-      {/* --- INTERACTIVE STATIONERY FOLDER SECTION --- */}
-      <section className="stationery-section">
+      {/* --- ATELIER SCRAPBOOK FOLDER SECTION --- */}
+      <section className="stationery-section" id="guidelines">
         <div className="full-wrap">
           <div className="stationery-container">
-            
-            {/* Folder Tabs matching reference graphic */}
-            <div className="folder-tabs" role="tablist" aria-label="Studio Rules and Guidelines">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'appointment'}
-                onClick={() => setActiveTab('appointment')}
-                className={`folder-tab ${activeTab === 'appointment' ? 'active' : ''}`}
-              >
-                <span className="num">01</span> Appointment
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'how'}
-                onClick={() => setActiveTab('how')}
-                className={`folder-tab ${activeTab === 'how' ? 'active' : ''}`}
-              >
-                <span className="num">02</span> How to Rent
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'terms'}
-                onClick={() => setActiveTab('terms')}
-                className={`folder-tab ${activeTab === 'terms' ? 'active' : ''}`}
-              >
-                <span className="num">03</span> Terms
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activeTab === 'reminder'}
-                onClick={() => setActiveTab('reminder')}
-                className={`folder-tab ${activeTab === 'reminder' ? 'active' : ''}`}
-              >
-                <span className="num">04</span> Reminder
-              </button>
+
+            <div className="folder-tabs-scroll">
+              <div className="folder-tabs" role="tablist" aria-label="Studio Rules and Guidelines">
+                {TABS.map((tab, index) => (
+                  <button
+                    key={tab.key}
+                    ref={(el) => {
+                      tabRefs.current[tab.key] = el
+                    }}
+                    type="button"
+                    role="tab"
+                    id={`tab-${tab.key}`}
+                    aria-selected={activeTab === tab.key}
+                    aria-controls={`panel-${tab.key}`}
+                    tabIndex={activeTab === tab.key ? 0 : -1}
+                    onClick={() => setActiveTab(tab.key)}
+                    onKeyDown={(e) => handleTabKeyDown(e, index)}
+                    className={`folder-tab ${activeTab === tab.key ? 'active' : ''}`}
+                    style={{ '--tab-accent': `var(--accent-${tab.key})` } as React.CSSProperties}
+                  >
+                    <span className="tab-icon"><TabIcon name={tab.icon} size={15} /></span>
+                    <span className="num">{tab.num}</span> {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Folder Body Card */}
-            <div className="folder-body">
-              <div className="folder-watermark">
-                <span>GR</span>
-              </div>
-
-              {/* TAB 01: FITTING APPOINTMENT */}
-              {activeTab === 'appointment' && (
-                <div role="tabpanel">
-                  <div className="stationery-header">
-                    <h3>Fitting Appointment</h3>
-                    <p>Everything You Need to Know</p>
-                  </div>
-                  <div className="stationery-grid">
-                    {FITTING_STEPS.map((step) => (
-                      <div key={step.num} className="stationery-item">
-                        <span className="step-num">{step.num}</span>
-                        <h4>{step.title}</h4>
-                        <p>{step.desc}</p>
-                      </div>
-                    ))}
-                  </div>
+<div className="stationery-paper-stack">
+              <div className="folder-body">
+                <div className="folder-inner-lace" aria-hidden="true" />
+                <div className="folder-watermark" aria-hidden="true">
+                  <span>GR</span>
                 </div>
-              )}
 
-              {/* TAB 02: HOW TO RENT */}
-              {activeTab === 'how' && (
-                <div role="tabpanel">
-                  <div className="stationery-header">
-                    <h3>How to Rent</h3>
-                    <p>Everything You Need to Know</p>
+                {activeTab === 'appointment' && (
+                  <div role="tabpanel" id="panel-appointment" aria-labelledby="tab-appointment" tabIndex={0} style={{ '--tab-accent': 'var(--accent-appointment)' } as React.CSSProperties}>
+                    <div className="stationery-header">
+                      <CoquetteBow width={48} height={32} style={{ color: 'var(--rose-deep)', marginBottom: 8 }} />
+                      <h3>Fitting Appointment</h3>
+                      <p>Everything You Need to Know</p>
+                    </div>
+                    <div className="stationery-grid">
+                      {FITTING_STEPS.map((step) => (
+                        <div key={step.num} className="stationery-item">
+                          <span className="step-num">{step.num} <span style={{ fontSize: '1rem', fontStyle: 'normal', color: 'var(--rose)' }}>♡</span></span>
+                          <h4>{step.title}</h4>
+                          <p>{step.desc}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="stationery-grid">
-                    {HOW_TO_RENT_STEPS.map((step) => (
-                      <div key={step.num} className="stationery-item">
-                        <span className="step-num">{step.num}</span>
-                        <h4>{step.title}</h4>
-                        <p>{step.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* TAB 03: TERMS & CONDITIONS */}
-              {activeTab === 'terms' && (
-                <div role="tabpanel">
-                  <div className="stationery-header">
-                    <h3>Terms &amp; Conditions</h3>
-                    <p>Please take a moment to read our rental guidelines.</p>
+                {activeTab === 'how' && (
+                  <div role="tabpanel" id="panel-how" aria-labelledby="tab-how" tabIndex={0} style={{ '--tab-accent': 'var(--accent-how)' } as React.CSSProperties}>
+                    <div className="stationery-header">
+                      <CoquetteBow width={48} height={32} style={{ color: 'var(--rose-deep)', marginBottom: 8 }} />
+                      <h3>How to Rent</h3>
+                      <p>Everything You Need to Know</p>
+                    </div>
+                    <div className="stationery-grid">
+                      {HOW_TO_RENT_STEPS.map((step) => (
+                        <div key={step.num} className="stationery-item">
+                          <span className="step-num">{step.num} <span style={{ fontSize: '1rem', fontStyle: 'normal', color: 'var(--rose)' }}>♡</span></span>
+                          <h4>{step.title}</h4>
+                          <p>{step.desc}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <ul className="stationery-list">
-                    {TERMS_CONDITIONS.map((term, idx) => (
-                      <li key={idx}>
-                        <h4>{term.title}</h4>
-                        <p>{term.desc}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                )}
 
-              {/* TAB 04: FRIENDLY REMINDER */}
-              {activeTab === 'reminder' && (
-                <div role="tabpanel">
-                  <div className="stationery-header">
-                    <h3>Friendly Reminder</h3>
-                    <p>To Our Valued Client</p>
-                  </div>
-                  <div className="stationery-prose">
-                    <p className="intro">
-                      Thank you for choosing Gigi&apos;s Rentals. We truly appreciate your trust in us and hope you enjoy wearing one of our dresses. To help us maintain the quality and beauty of every rental, we kindly ask that you handle your dress with care throughout the rental period.
-                    </p>
-                    <ul>
-                      {REMINDER_BULLETS.map((bullet, idx) => (
-                        <li key={idx}>{bullet}</li>
+                {activeTab === 'terms' && (
+                  <div role="tabpanel" id="panel-terms" aria-labelledby="tab-terms" tabIndex={0} style={{ '--tab-accent': 'var(--accent-terms)' } as React.CSSProperties}>
+                    <div className="stationery-header">
+                      <CoquetteBow width={48} height={32} style={{ color: 'var(--rose-deep)', marginBottom: 8 }} />
+                      <h3>Terms &amp; Conditions</h3>
+                      <p>Please take a moment to read our rental etiquette.</p>
+                    </div>
+                    <ul className="stationery-list">
+                      {TERMS_CONDITIONS.map((term, idx) => (
+                        <li key={idx}>
+                          <h4><span style={{ color: 'var(--rose)' }}>❀</span> {term.title}</h4>
+                          <p>{term.desc}</p>
+                        </li>
                       ))}
                     </ul>
-                    <p className="outro">
-                      Thank you for treating our dresses with love and care. We hope you feel beautiful and confident in your chosen dress. Until your next special occasion!
-                    </p>
-                    <div className="sign-off">With love, Gigi&apos;s Rentals</div>
                   </div>
-                </div>
-              )}
+                )}
 
+                {activeTab === 'reminder' && (
+                  <div role="tabpanel" id="panel-reminder" aria-labelledby="tab-reminder" tabIndex={0} style={{ '--tab-accent': 'var(--accent-reminder)' } as React.CSSProperties}>
+                    <div className="stationery-header">
+                      <CoquetteBow width={48} height={32} style={{ color: 'var(--rose-deep)', marginBottom: 8 }} />
+                      <h3>Friendly Reminder</h3>
+                      <p>To Our Valued Client</p>
+                    </div>
+                    <div className="stationery-prose">
+                      <p className="intro">
+                        Thank you for choosing Gigi&apos;s Rentals. We truly appreciate your trust in us and hope you enjoy wearing one of our dresses. To help us maintain the quality and beauty of every rental, we kindly ask that you handle your dress with care throughout the rental period.
+                      </p>
+                      <ul>
+                        {REMINDER_BULLETS.map((bullet, idx) => (
+                          <li key={idx}>{bullet}</li>
+                        ))}
+                      </ul>
+                      <p className="outro">
+                        Thank you for treating our dresses with love and care. We hope you feel beautiful and confident in your chosen silhouette. Until your next special occasion!
+                      </p>
+                      <div className="sign-off">With love, Gigi&apos;s Rentals</div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --- EXTRACTED FOOTER COMPONENT --- */}
       <Footer />
     </>
   )
