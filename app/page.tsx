@@ -11,7 +11,7 @@ interface StepItem {
   desc: string
 }
 
-const HERO_IMAGE = 'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?auto=format&fit=crop&w=2200&q=80'
+const HERO_IMAGE = '/logo/6.jpg'
 
 // --- CURATED RULES & GUIDELINES DATA ---
 const HOW_TO_RENT_STEPS: StepItem[] = [
@@ -81,9 +81,9 @@ const ROW_TWO = [
 const doubled = <T,>(arr: readonly T[]) => [...arr, ...arr]
 
 const TABS = [
-  { key: 'appointment', label: 'Appointment', num: '01', icon: 'calendar' as const },
+  { key: 'terms', label: 'Terms & Condition', num: '01', icon: 'scroll' as const },
   { key: 'how', label: 'How to Rent', num: '02', icon: 'mirror' as const },
-  { key: 'terms', label: 'Terms', num: '03', icon: 'scroll' as const },
+  { key: 'appointment', label: 'Fitting', num: '03', icon: 'calendar' as const },
   { key: 'reminder', label: 'Reminder', num: '04', icon: 'swan' as const },
 ] as const
 
@@ -175,7 +175,7 @@ function TabIcon({ name, size = 16 }: { name: 'calendar' | 'mirror' | 'scroll' |
 }
 
 export default function RulesPage() {
-  const [activeTab, setActiveTab] = useState<TabKey>('appointment')
+  const [activeTab, setActiveTab] = useState<TabKey>('terms')
   const tabRefs = useRef<Record<TabKey, HTMLButtonElement | null>>({
     appointment: null,
     how: null,
@@ -186,6 +186,10 @@ export default function RulesPage() {
   const focusTab = (key: TabKey) => {
     setActiveTab(key)
     tabRefs.current[key]?.focus()
+  }
+
+  const scrollToGuidelines = () => {
+    document.getElementById('guidelines')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   const handleTabKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -202,8 +206,7 @@ export default function RulesPage() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&family=Parisienne&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Jost:wght@300;400;500;600&family=Parisienne&display=swap');
         :root {
           --porcelain: #FFFBF7;
           --card: #FFFFFF;
@@ -229,6 +232,47 @@ export default function RulesPage() {
         }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+        @keyframes coquette-wiggle {
+          0%, 100% { transform: translateY(-3px) rotate(0deg) scale(1.03); }
+          25% { transform: translateY(-3px) rotate(-3deg) scale(1.03); }
+          75% { transform: translateY(-3px) rotate(3deg) scale(1.03); }
+        }
+        @keyframes coquette-sparkle {
+          0% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+          40% { opacity: 1; transform: scale(1) rotate(15deg); }
+          100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
+        }
+        .coquette-hover {
+          position: relative;
+          overflow: visible;
+          transition: transform .25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .coquette-hover::after {
+          content: '✦';
+          position: absolute;
+          top: -16px;
+          right: -10px;
+          font-size: 1.4rem;
+          color: var(--rose-deep);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity .2s ease;
+          z-index: 20;
+        }
+        /* Sparkle adjusted for logo wrapper */
+        .logo-wrapper.coquette-hover::after {
+          font-size: 2.2rem;
+          top: -5px;
+          right: 5%;
+        }
+        .coquette-hover:hover::after {
+          opacity: 1;
+          animation: coquette-sparkle 1.1s ease-in-out infinite;
+        }
+        .coquette-hover:hover {
+          transition: none;
+          animation: coquette-wiggle 1.6s ease-in-out infinite;
+        }
         body {
           background: var(--porcelain);
           color: var(--mocha);
@@ -261,23 +305,25 @@ export default function RulesPage() {
         }
 
         /* --- ROMANTIC TULLE HERO SECTION --- */
-        .gg-hero {
+.gg-hero {
           position: relative;
-          min-height: calc(85vh - 84px);
+          min-height: auto;
           display: flex;
           flex-direction: column;
           overflow: hidden;
           background: var(--porcelain);
+          padding-top: 88px;
         }
         .gg-hero-photo {
           position: absolute;
           inset: 0;
           background-image:
-            linear-gradient(180deg, rgba(255,251,247,.95) 0%, rgba(255,251,247,.82) 50%, rgba(255,251,247,.98) 100%),
+            linear-gradient(180deg, rgba(255,251,247,.05) 0%, rgba(255,251,247,.1) 45%, rgba(255,251,247,.35) 100%),
             url('${HERO_IMAGE}');
-          background-size: cover;
-          background-position: center 30%;
-          filter: saturate(0.8) brightness(1.03);
+          background-repeat: no-repeat, no-repeat;
+          background-size: cover, cover;
+          background-position: center center, center center;
+          filter: saturate(1.05) brightness(1.0);
           z-index: 0;
         }
         .gg-tulle-overlay {
@@ -300,7 +346,7 @@ export default function RulesPage() {
           pointer-events: none;
         }
 
-        .gg-hero-main {
+.gg-hero-main {
           position: relative;
           z-index: 3;
           flex: 1;
@@ -308,25 +354,25 @@ export default function RulesPage() {
           align-items: center;
           justify-content: center;
           text-align: center;
-          padding: clamp(40px, 8vh, 80px) clamp(24px, 5vw, 64px) clamp(30px, 5vh, 50px);
+          padding: clamp(8px, 2vh, 20px) clamp(24px, 5vw, 64px) clamp(16px, 3vh, 28px);
         }
         .gg-hero-content { max-width: 780px; display: flex; flex-direction: column; align-items: center; }
-
-        .gg-eyebrow-pill {
+        
+.gg-eyebrow-pill {
           display: inline-flex;
           align-items: center;
           gap: 10px;
           padding: 8px 22px;
           border-radius: 999px;
           border: 1px dashed var(--rose);
-          background: rgba(255,255,255,.75);
+          background: rgba(255,255,255,.85);
           backdrop-filter: blur(8px);
           font-size: .75rem;
           font-weight: 500;
           letter-spacing: .16em;
           text-transform: uppercase;
           color: var(--rose-deep);
-          margin-bottom: 24px;
+          margin-bottom: 4px;
           box-shadow: var(--shadow-xs);
         }
 
@@ -334,11 +380,54 @@ export default function RulesPage() {
           font-family: 'Cormorant Garamond', serif;
           font-weight: 500;
           font-style: italic;
-          font-size: clamp(3rem, 6.8vw, 5.6rem);
+          font-size: clamp(2rem, 6.8vw, 5.6rem);
           line-height: 1.05;
           color: var(--mocha);
-          margin-bottom: 22px;
+          margin-bottom: 14px;
           letter-spacing: -.01em;
+        }
+        
+        /* Wrapper to allow ::after sparkle on logo */
+.logo-wrapper {
+          display: inline-block;
+          cursor: pointer;
+          margin: -12px auto -20px;
+          max-width: min(340px, 60vw);
+          width: 100%;
+        }
+        .logo-wrapper img {
+          width: 100%;
+          height: auto;
+          display: block;
+          filter: drop-shadow(0 2px 8px rgba(184, 107, 125, 0.15));
+          transition: filter .3s ease;
+        }
+        .logo-wrapper:hover img,
+        .logo-wrapper:active img {
+          filter: drop-shadow(0 6px 18px rgba(184, 107, 125, 0.35));
+        }
+
+        .gg-info-card {
+          display: inline-flex;
+          flex-direction: column;
+          gap: 4px;
+          background: rgba(255, 251, 247, 0.85);
+          border: 1px solid var(--rose);
+          border-radius: 18px;
+          padding: 16px 32px;
+          margin: 4px auto 0;
+          box-shadow: var(--shadow-xs);
+        }
+        .gg-info-card span {
+          font-family: 'Cormorant Garamond', serif;
+          font-weight: 600;
+          font-size: .85rem;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+          color: var(--rose-deep);
+        }
+        @media (max-width: 640px) {
+          .gg-eyebrow-pill { margin-bottom: 14px; }
         }
         .gg-hero-content h1 .accent {
           display: block;
@@ -384,7 +473,6 @@ export default function RulesPage() {
         }
         .gg-btn-primary:hover {
           background: var(--rose-deep);
-          transform: translateY(-3px);
           box-shadow: 0 4px 10px rgba(74, 51, 55, 0.2), 0 20px 38px -8px rgba(184, 107, 125, 0.55);
         }
         .gg-btn-ghost {
@@ -398,7 +486,6 @@ export default function RulesPage() {
           background: var(--blush-ribbon);
           border-style: solid;
           color: var(--rose-deep);
-          transform: translateY(-2px);
           box-shadow: var(--shadow-sm);
         }
         .gg-btn:focus-visible {
@@ -529,14 +616,11 @@ export default function RulesPage() {
           }
         }
         
-        /* Rounded folder tabs with gentle slope (16px 22px 0 0), overlapped by -12px */
-        .folder-tab {
-          background: #F5EAEC;
-          border: 1px solid rgba(184, 107, 125, 0.35);
-          border-bottom: none;
-          padding: 12px 22px;
+.folder-tab {
+          background: transparent;
+          border: none;
+          padding: 14px 26px 12px;
           min-height: 48px;
-          border-radius: 16px 22px 0 0;
           font-family: 'Jost', sans-serif;
           font-size: .78rem;
           font-weight: 500;
@@ -544,7 +628,7 @@ export default function RulesPage() {
           text-transform: uppercase;
           color: var(--mocha-soft);
           cursor: pointer;
-          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: color 0.25s ease;
           display: flex;
           align-items: center;
           gap: 8px;
@@ -552,12 +636,32 @@ export default function RulesPage() {
           flex-shrink: 0;
           scroll-snap-align: start;
           position: relative;
-          margin-left: -12px;
-          box-shadow: 0 -2px 6px rgba(184, 107, 125, 0.06);
+          margin-left: -14px;
+          isolation: isolate;
+        }
+        .folder-tab::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: #F5EAEC;
+          border: 1px solid rgba(184, 107, 125, 0.35);
+          border-bottom: none;
+          transform: perspective(40px) rotateX(6deg);
+          transform-origin: bottom;
+          border-radius: 12px 12px 0 0;
+          z-index: -1;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .folder-tab:hover::before {
+          background: #FCEEF1;
         }
         .folder-tab:first-child { margin-left: 0; }
-        @media (min-width: 480px) {
+@media (min-width: 480px) {
           .folder-tab { padding: 14px 26px 12px; font-size: .82rem; letter-spacing: .12em; margin-left: -14px; }
+        }
+        @media (max-width: 479px) {
+          .folder-tab { min-height: 52px; padding: 14px 18px; }
+          .stationery-item, .stationery-list li { padding: 18px 18px; }
         }
         .folder-tab:hover {
           background: #FCEEF1;
@@ -569,18 +673,18 @@ export default function RulesPage() {
           z-index: 12 !important;
         }
         
-        /* Active tab sits over folder border (border-bottom: 3px solid #FFF7F8) */
         .folder-tab.active {
-          background: #FFF7F8;
           color: var(--mocha);
           font-weight: 600;
-          border: 1px solid var(--rose-deep);
-          border-bottom: 3px solid #FFF7F8;
-          padding-bottom: 16px;
-          margin-bottom: -2px;
-          border-radius: 16px 22px 0 0;
-          box-shadow: 0 -8px 20px -6px rgba(184, 107, 125, 0.18);
+          padding-bottom: 18px;
+          margin-bottom: -1px;
           z-index: 10 !important;
+        }
+        .folder-tab.active::before {
+          background: #FFF7F8;
+          border: 1px solid var(--rose-deep);
+          border-bottom: none;
+          box-shadow: 0 -8px 20px -6px rgba(184, 107, 125, 0.18);
         }
         .folder-tab .tab-icon {
           display: flex;
@@ -640,7 +744,6 @@ export default function RulesPage() {
           z-index: -2;
         }
 
-        /* Folder body sits at z-index: 5, above inactive tabs (z-index 1..4), below active tab (z-index 10) */
         .folder-body {
           background: #FFF7F8;
           border: 1px solid var(--rose-deep);
@@ -709,11 +812,16 @@ export default function RulesPage() {
           flex-direction: column;
           align-items: center;
         }
-        .stationery-header h3 {
-          font-family: 'Parisienne', cursive;
-          font-size: clamp(2.4rem, 6vw, 4.2rem);
+.stationery-header h3 {
+          font-family: 'Jost', sans-serif !important;
+          font-style: normal !important;
+          font-weight: 500 !important;
+          font-size: clamp(1.4rem, 3.2vw, 2.2rem) !important;
+          letter-spacing: .16em !important;
+          text-transform: uppercase !important;
           color: var(--rose-deep);
-          margin-bottom: 2px;
+          margin-bottom: 6px;
+          line-height: 1.3;
         }
         .stationery-header p {
           font-family: 'Cormorant Garamond', serif;
@@ -738,11 +846,29 @@ export default function RulesPage() {
           transition: transform 0.25s ease, box-shadow 0.25s ease, border-color .25s ease;
           position: relative;
           box-shadow: var(--shadow-xs);
+          overflow: visible;
+        }
+        .stationery-item::after {
+          content: '♡';
+          position: absolute;
+          top: -8px;
+          right: 12px;
+          font-size: .85rem;
+          color: var(--tab-accent, var(--rose-deep));
+          opacity: 0;
+          transform: scale(0.5) translateY(4px);
+          transition: opacity .25s ease, transform .25s ease;
+          pointer-events: none;
+        }
+        .stationery-item:hover::after {
+          opacity: 1;
+          transform: scale(1) translateY(0);
         }
         .stationery-item:hover {
-          transform: translateY(-4px);
+          transform: translateY(-6px) rotate(-0.6deg);
           box-shadow: var(--shadow-sm);
           border-color: var(--tab-accent, var(--rose-deep));
+          transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .3s ease, border-color .3s ease;
         }
         .stationery-item .step-num {
           font-family: 'Cormorant Garamond', serif;
@@ -755,13 +881,15 @@ export default function RulesPage() {
           gap: 6px;
           margin-bottom: 10px;
         }
-        .stationery-item h4 {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.3rem;
+.stationery-item h4 {
+          font-family: 'Jost', sans-serif;
+          font-size: .92rem;
           font-weight: 600;
+          letter-spacing: .06em;
+          text-transform: uppercase;
           margin-bottom: 8px;
           color: var(--mocha);
-          line-height: 1.25;
+          line-height: 1.4;
         }
         .stationery-item p {
           font-size: .93rem;
@@ -789,10 +917,12 @@ export default function RulesPage() {
           border-color: var(--tab-accent, var(--rose-deep));
           box-shadow: var(--shadow-sm);
         }
-        .stationery-list h4 {
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 1.25rem;
+.stationery-list h4 {
+          font-family: 'Jost', sans-serif;
+          font-size: .95rem;
           font-weight: 600;
+          letter-spacing: .06em;
+          text-transform: uppercase;
           color: var(--tab-accent, var(--rose-deep));
           margin-bottom: 7px;
           display: flex;
@@ -879,26 +1009,44 @@ export default function RulesPage() {
           <div className="gg-hero-content">
             <span className="gg-eyebrow-pill">
               <CoquetteBow width={22} height={14} style={{ color: 'var(--rose-deep)' }} />
-              modern vietnamese rental atelier
+              Because Every Girl Deserves Her Dream Dress
             </span>
 
-            <h1>
-              Dress rentals,
-              <span className="accent">reimagined with grace.</span>
-            </h1>
+            {/* ✅ Wrapped logo in a div so coquette wiggle & sparkle (✦) render cleanly in Chrome/Edge! */}
+            <div className="logo-wrapper coquette-hover">
+              <img
+                src="/logo/1.png"
+                alt="Gigi's Rentals"
+              />
+            </div>
 
             <p className="lead">
-              Gigi&apos;s Rentals is an intimate atelier for custom-fitted gowns and cocktail
-              silhouettes — every piece tailored just for you through private appointments. Explore our studio etiquette and care standards below.
-            </p>
+              Every celebration deserves a dress that leaves a lasting impression. 
+              At Gigi&apos;s Rentals, we combine timeless style with exceptional service, ensuring you find a piece that makes every occasion feel truly extraordinary.
 
+            </p>
+            
             <div className="gg-hero-cta-row">
-              <Link href="#guidelines" className="gg-btn gg-btn-primary" onClick={() => setActiveTab('appointment')}>
+              <button
+                type="button"
+                className="gg-btn gg-btn-primary coquette-hover"
+                onClick={() => {
+                  setActiveTab('terms')
+                  scrollToGuidelines()
+                }}
+              >
                 Explore Studio Rules
-              </Link>
-              <Link href="#guidelines" className="gg-btn gg-btn-ghost" onClick={() => setActiveTab('how')}>
+              </button>
+              <button
+                type="button"
+                className="gg-btn gg-btn-ghost coquette-hover"
+                onClick={() => {
+                  setActiveTab('how')
+                  scrollToGuidelines()
+                }}
+              >
                 Rental Etiquette
-              </Link>
+              </button>
             </div>
 
             <div className="gg-trust-row">
@@ -960,7 +1108,7 @@ export default function RulesPage() {
                     tabIndex={activeTab === tab.key ? 0 : -1}
                     onClick={() => setActiveTab(tab.key)}
                     onKeyDown={(e) => handleTabKeyDown(e, index)}
-                    className={`folder-tab ${activeTab === tab.key ? 'active' : ''}`}
+                    className={`folder-tab coquette-hover ${activeTab === tab.key ? 'active' : ''}`}
                     style={{
                       '--tab-accent': `var(--accent-${tab.key})`,
                       zIndex: activeTab === tab.key ? 10 : TABS.length - index,
