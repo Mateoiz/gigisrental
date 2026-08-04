@@ -5,8 +5,10 @@ import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 // --- TYPES ---
+// --- TYPES ---
 interface BookingState {
-  category: string | null
+  dressId: string | null
+  dressName: string | null
   date: string | null
   time: string | null
   rentalDays: number | null
@@ -15,14 +17,6 @@ interface BookingState {
   phone: string
   notes: string
 }
-
-const CATEGORIES = [
-  'Modern Vietnamese (Áo Dài)',
-  'Chantilly Lace Gown',
-  'Satin & Pearl Evening Wear',
-  'Custom Fitted Ball Gown',
-  'Not sure yet — help me choose',
-]
 
 const TIME_SLOTS = [
   '9:00 AM', '10:00 AM', '11:00 AM',
@@ -57,12 +51,14 @@ export default function BookingForm() {
   const [step, setStep] = useState(0)
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null);
-  const [dressLoading, setDressLoading] = useState(!!dressSlug)
+const [submitError, setSubmitError] = useState<string | null>(null)
+  const [allDresses, setAllDresses] = useState<{ id: string; name: string; is_available: boolean; slug: string }[]>([])
+  const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null)
+  const [dressLoading, setDressLoading] = useState(true)
 
   const [booking, setBooking] = useState<BookingState>({
-    category: null,
+    dressId: null,
+    dressName: null,
     date: null,
     time: null,
     rentalDays: null,
@@ -72,33 +68,39 @@ const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: str
     notes: '',
   })
 
-useEffect(() => {
-    if (!dressSlug) return
-    const fetchDress = async () => {
+  // Fetch ALL dresses so we can display them dynamically
+  useEffect(() => {
+    const fetchDresses = async () => {
       const { data } = await supabase
         .from('dresses')
-        .select('id, name, category, is_available')
-        .eq('slug', dressSlug)
-        .single()
+        .select('id, name, slug, category, is_available')
+        .order('name')
 
       if (data) {
-        setPreselectedDress(data)
-        // Only auto-fill and jump to Date step if the dress is actually available
-        if (data.is_available) {
-          setBooking((b) => ({ ...b, category: data.name }))
-          setStep(1) 
+        setAllDresses(data)
+        
+        // Handle pre-selection if they arrived from a specific dress URL
+        if (dressSlug) {
+          const preselected = data.find(d => d.slug === dressSlug)
+          if (preselected) {
+            setPreselectedDress(preselected)
+            if (preselected.is_available) {
+              setBooking((b) => ({ ...b, dressId: preselected.id, dressName: preselected.name }))
+              setStep(1) 
+            }
+          }
         }
       }
       setDressLoading(false)
     }
-    fetchDress()
+    fetchDresses()
   }, [dressSlug])
 
   const dates = generateDates()
 
 const canProceed = () => {
     switch (step) {
-      case 0: return !!booking.category
+      case 0: return !!booking.dressId
       case 1: return !!booking.date
       case 2: return !!booking.time
       case 3: return !!booking.rentalDays
@@ -106,15 +108,16 @@ const canProceed = () => {
       default: return true
     }
   }
-const next = async () => {
+
+  const next = async () => {
     if (!canProceed()) return
     if (step === STEPS.length - 1) {
       setSubmitting(true)
       setSubmitError(null)
 
-const { error } = await supabase.from('bookings').insert({
-        dress_id: preselectedDress?.id ?? null,
-        category: booking.category,
+      const { error } = await supabase.from('bookings').insert({
+        dress_id: booking.dressId,
+        category: booking.dressName, // Store the name in the category column for easy reading
         booking_date: booking.date,
         booking_time: booking.time,
         rental_days: booking.rentalDays,
@@ -124,14 +127,13 @@ const { error } = await supabase.from('bookings').insert({
         notes: booking.notes || null,
       })
 
-      // If the booking was successful and they booked a specific dress, mark it as unavailable
-      if (!error && preselectedDress?.id) {
+      // If the booking was successful, mark the chosen dress as unavailable
+      if (!error && booking.dressId) {
         await supabase
           .from('dresses')
           .update({ is_available: false })
-          .eq('id', preselectedDress.id)
+          .eq('id', booking.dressId)
       }
-
       setSubmitting(false)
 
       if (error) {
@@ -606,25 +608,33 @@ const { error } = await supabase.from('bookings').insert({
             </div>
           </div>
         ) : (
-          <div className="bk-card">
+<div className="bk-card">
             {step === 0 && (
               <>
                 <div className="bk-card-header">
-                  <h2>Pick a style</h2>
-                  <p>Which category are you most drawn to for your fitting?</p>
+                  <h2>Pick a piece</h2>
+                  <p>Which dress are you booking a fitting for?</p>
                 </div>
                 <div className="bk-list">
-                  {CATEGORIES.map((c) => (
+                  {allDresses.filter(d => d.is_available).map((d) => (
                     <button
-                      key={c}
+                      key={d.id}
                       type="button"
-                      className={`bk-option ${booking.category === c ? 'selected' : ''}`}
-                      onClick={() => update('category', c)}
+                      className={`bk-option ${booking.dressId === d.id ? 'selected' : ''}`}
+                      onClick={() => {
+                        update('dressId', d.id)
+                        update('dressName', d.name)
+                      }}
                     >
-                      <h4>{c}</h4>
+                      <h4>{d.name}</h4>
                       <span className="bk-check" />
                     </button>
                   ))}
+                  {allDresses.filter(d => d.is_available).length === 0 && (
+                    <p style={{ textAlign: 'center', color: 'var(--mocha-soft)' }}>
+                      No pieces are currently available for booking.
+                    </p>
+                  )}
                 </div>
               </>
             )}
@@ -746,8 +756,8 @@ const { error } = await supabase.from('bookings').insert({
                 </div>
                 <div className="bk-summary">
                   <div className="bk-summary-row">
-                    <span className="k">Style</span>
-                    <span className="v">{booking.category}</span>
+                    <span className="k">Piece</span>
+                    <span className="v">{booking.dressName}</span>
                   </div>
                   <div className="bk-summary-row">
                     <span className="k">Date</span>

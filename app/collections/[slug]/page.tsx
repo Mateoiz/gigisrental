@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import Footer from '@/app/components/Footer'
 import CoquetteBow from '@/app/components/CoquetteBow'
@@ -152,7 +153,7 @@ return (
                 {allImages.length > 1 && (
                   <div className="dress-thumbnails">
                     {allImages.map((img, index) => (
-<button
+                      <button
                         key={`thumb-${index}`}
                         type="button"
                         onClick={() => {
@@ -162,9 +163,16 @@ return (
                           })
                         }}
                         className={`dress-thumbnail-item ${activeIndex === index ? 'is-active' : ''}`}
-                        style={{ backgroundImage: `url('${img}')` }}
                         aria-label={`Scroll to image ${index + 1}`}
-                      />
+                      >
+                        <Image
+                          src={img}
+                          alt=""
+                          fill
+                          sizes="64px"
+                          className="dress-thumbnail-img"
+                        />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -172,7 +180,7 @@ return (
                 {/* Editorial Scroll Display */}
 {/* Editorial Scroll Display */}
                 <div className="dress-gallery scroll-display">
-                  {allImages.map((img, index) => (
+         {allImages.map((img, index) => (
                     <button
                       key={index}
                       id={`gallery-img-${index}`}
@@ -182,19 +190,27 @@ return (
                         const { left, top, width, height } = e.currentTarget.getBoundingClientRect()
                         const x = ((e.clientX - left) / width) * 100
                         const y = ((e.clientY - top) / height) * 100
-                        e.currentTarget.style.backgroundPosition = `${x}% ${y}%`
+                        e.currentTarget.style.setProperty('--zoom-x', `${x}%`)
+                        e.currentTarget.style.setProperty('--zoom-y', `${y}%`)
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundPosition = 'center'
+                        e.currentTarget.style.setProperty('--zoom-x', '50%')
+                        e.currentTarget.style.setProperty('--zoom-y', '50%')
                       }}
                       className="dress-gallery-item"
                       aria-label="View zoomed image"
-                      style={{ 
-                        backgroundImage: `url('${img}')`,
-                        animationDelay: `${index * 0.15}s` 
-                      }}
-                    />
-))}
+                      style={{ animationDelay: `${index * 0.15}s` }}
+                    >
+                      <Image
+                        src={img}
+                        alt=""
+                        fill
+                        sizes="(max-width: 760px) 88vw, 55vw"
+                        priority={index === 0}
+                        className="dress-gallery-img"
+                      />
+                    </button>
+                  ))}
                 </div>
                 
                 {/* Mobile Pagination Dots */}
@@ -247,8 +263,13 @@ return (
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
           <div className="lightbox-content">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={zoomedImage} alt="Zoomed dress detail" className="lightbox-image" />
+            <Image
+              src={zoomedImage}
+              alt="Zoomed dress detail"
+              fill
+              sizes="100vw"
+              className="lightbox-image"
+            />
           </div>
         </div>
       )}
@@ -306,18 +327,19 @@ const DRESS_STYLES = `
 }
 
 .dress-thumbnail-item {
+  position: relative;
   width: 100%;
   aspect-ratio: 3 / 4;
-  background-size: cover;
-  background-position: center;
   background-color: #FBF9F6;
   border: 1px solid transparent;
   border-radius: 2px;
   cursor: pointer;
   padding: 0;
   opacity: 0.5;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
+.dress-thumbnail-img { object-fit: cover; }
 
 .dress-thumbnail-item:hover,
 .dress-thumbnail-item.is-active {
@@ -351,8 +373,6 @@ const DRESS_STYLES = `
   position: relative;
   width: 100%;
   aspect-ratio: 3 / 4;
-  background-size: cover;
-  background-position: center;
   background-color: #FBF9F6;
   border: none;
   border-radius: 2px;
@@ -362,13 +382,19 @@ const DRESS_STYLES = `
   overflow: hidden;
   padding: 0;
   outline: none;
-  transition: background-size 0.3s ease-out; /* Smoothly zooms in */
+  --zoom-x: 50%;
+  --zoom-y: 50%;
+}
+.dress-gallery-img {
+  object-fit: cover;
+  transition: transform 0.3s ease-out;
+  transform-origin: var(--zoom-x) var(--zoom-y);
 }
 
 /* The hover scanning zoom (Desktop only) */
 @media (hover: hover) {
-  .dress-gallery-item:hover {
-    background-size: 250%; /* Adjust this number to increase/decrease the magnification level */
+  .dress-gallery-item:hover .dress-gallery-img {
+    transform: scale(2.5);
   }
 }
 
@@ -407,19 +433,13 @@ const DRESS_STYLES = `
   color: var(--rose-deep);
 }
 .lightbox-content {
+  position: relative;
   width: 100%;
   height: 100%;
   padding: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 .lightbox-image {
-  max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
-  border-radius: 4px;
   animation: scaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
