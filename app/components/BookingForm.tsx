@@ -1,12 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 // --- TYPES ---
 interface BookingState {
   category: string | null
   date: string | null
   time: string | null
+  rentalDays: number | null
   name: string
   email: string
   phone: string
@@ -26,7 +29,9 @@ const TIME_SLOTS = [
   '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM',
 ]
 
-const STEPS = ['Style', 'Date', 'Time', 'Details', 'Confirm'] as const
+const RENTAL_DURATIONS = [1, 2, 3, 4, 5]
+
+const STEPS = ['Style', 'Date', 'Time', 'Duration', 'Details', 'Confirm'] as const
 
 function generateDates(days = 21) {
   const out: { iso: string; weekday: string; day: string; month: string }[] = []
@@ -46,39 +51,88 @@ function generateDates(days = 21) {
 }
 
 export default function BookingForm() {
+  const searchParams = useSearchParams()
+  const dressSlug = searchParams.get('dress')
+
   const [step, setStep] = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null } | null>(null)
+  const [dressLoading, setDressLoading] = useState(!!dressSlug)
+
   const [booking, setBooking] = useState<BookingState>({
     category: null,
     date: null,
     time: null,
+    rentalDays: null,
     name: '',
     email: '',
     phone: '',
     notes: '',
   })
 
+  useEffect(() => {
+    if (!dressSlug) return
+    const fetchDress = async () => {
+      const { data } = await supabase
+        .from('dresses')
+        .select('id, name, category')
+        .eq('slug', dressSlug)
+        .single()
+
+      if (data) {
+        setPreselectedDress(data)
+        setBooking((b) => ({ ...b, category: data.name }))
+        setStep(1) // skip Style step, jump to Date
+      }
+      setDressLoading(false)
+    }
+    fetchDress()
+  }, [dressSlug])
+
   const dates = generateDates()
 
-  const canProceed = () => {
+const canProceed = () => {
     switch (step) {
       case 0: return !!booking.category
       case 1: return !!booking.date
       case 2: return !!booking.time
-      case 3: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== ''
+      case 3: return !!booking.rentalDays
+      case 4: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== ''
       default: return true
     }
   }
-
-  const next = () => {
+const next = async () => {
     if (!canProceed()) return
     if (step === STEPS.length - 1) {
+      setSubmitting(true)
+      setSubmitError(null)
+
+      const { error } = await supabase.from('bookings').insert({
+        dress_id: preselectedDress?.id ?? null,
+        category: booking.category,
+        booking_date: booking.date,
+        booking_time: booking.time,
+        rental_days: booking.rentalDays,
+        full_name: booking.name,
+        email: booking.email,
+        phone: booking.phone,
+        notes: booking.notes || null,
+      })
+
+      setSubmitting(false)
+
+      if (error) {
+        setSubmitError('Something went wrong submitting your request. Please try again.')
+        return
+      }
+
       setSubmitted(true)
       return
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
   }
-
   const back = () => setStep((s) => Math.max(s - 1, 0))
 
   const goToStep = (i: number) => {
@@ -491,8 +545,16 @@ export default function BookingForm() {
         }
       `}</style>
 
-      <div className="bk-root">
-        {!submitted && (
+<div className="bk-root">
+        {dressLoading && <p style={{ textAlign: 'center', color: 'var(--mocha-soft)' }}>Loading...</p>}
+
+        {!dressLoading && preselectedDress && !submitted && (
+          <p style={{ textAlign: 'center', color: 'var(--rose-deep)', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.1rem', marginBottom: '20px' }}>
+            Booking a fitting for <strong>{preselectedDress.name}</strong>
+          </p>
+        )}
+
+        {!dressLoading && !submitted && (
           <div className="bk-tracker">
             {STEPS.map((label, i) => (
               <button
@@ -501,14 +563,14 @@ export default function BookingForm() {
                 className={`bk-tracker-step ${i === step ? 'active' : ''} ${i < step ? 'done' : ''}`}
                 onClick={() => goToStep(i)}
               >
-                <span className="bk-dot">{i < step ? '✓' : i + 1}</span>
+<span className="bk-dot">{i < step ? '✓' : i + 1}</span>
                 <span className="bk-tracker-label">{label}</span>
               </button>
             ))}
           </div>
         )}
 
-        {submitted ? (
+        {!dressLoading && submitted ? (
           <div className="bk-card">
             <div className="bk-success">
               <div className="stamp">♡</div>
@@ -589,7 +651,28 @@ export default function BookingForm() {
               </>
             )}
 
-            {step === 3 && (
+{step === 3 && (
+              <>
+                <div className="bk-card-header">
+                  <h2>How many days?</h2>
+                  <p>Select your rental duration.</p>
+                </div>
+                <div className="bk-time-grid">
+                  {RENTAL_DURATIONS.map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      className={`bk-time-cell ${booking.rentalDays === d ? 'selected' : ''}`}
+                      onClick={() => update('rentalDays', d)}
+                    >
+                      {d} {d === 1 ? 'day' : 'days'}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {step === 4 && (
               <>
                 <div className="bk-card-header">
                   <h2>Your details</h2>
@@ -633,7 +716,7 @@ export default function BookingForm() {
               </>
             )}
 
-            {step === 4 && (
+{step === 5 && (
               <>
                 <div className="bk-card-header">
                   <h2>Confirm your booking</h2>
@@ -651,6 +734,10 @@ export default function BookingForm() {
                   <div className="bk-summary-row">
                     <span className="k">Time</span>
                     <span className="v">{booking.time}</span>
+                  </div>
+                  <div className="bk-summary-row">
+                    <span className="k">Duration</span>
+                    <span className="v">{booking.rentalDays} {booking.rentalDays === 1 ? 'day' : 'days'}</span>
                   </div>
                   <div className="bk-summary-row">
                     <span className="k">Name</span>
@@ -679,15 +766,20 @@ export default function BookingForm() {
               >
                 Back
               </button>
-              <button
+<button
                 type="button"
                 className="bk-btn bk-btn-primary"
                 onClick={next}
-                disabled={!canProceed()}
+                disabled={!canProceed() || submitting}
               >
-                {step === STEPS.length - 1 ? 'Confirm Booking' : 'Continue'}
+                {submitting ? 'Submitting...' : step === STEPS.length - 1 ? 'Confirm Booking' : 'Continue'}
               </button>
             </div>
+            {submitError && (
+              <p style={{ color: 'var(--rose-deep)', textAlign: 'center', marginTop: '14px', fontSize: '.85rem' }}>
+                {submitError}
+              </p>
+            )}
           </div>
         )}
       </div>

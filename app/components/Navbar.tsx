@@ -1,298 +1,153 @@
-'use client'
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-const FB_URL = 'https://www.facebook.com/profile.php?id=61592240190387'
+const NAV_LINKS = [
+  { label: "About", href: "/about" },
+  { label: "Collections", href: "/collections" },
+  { label: "Guidelines", href: "/#terms" },
+  { label: "Size Guide", href: "/size-guide" },
+];
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = React.useState(false)
-  const [isHidden, setIsHidden] = React.useState(false)
-  const [menuOpen, setMenuOpen] = React.useState(false)
-  
-  // Ref to keep track of the last scroll position without re-triggering renders
-  const lastScrollY = React.useRef(0)
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
-  React.useEffect(() => {
-    const onScroll = () => {
-      const currentScrollY = window.scrollY
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-      // 1. Handle transparency state (are we at the very top / y-0?)
-      setIsScrolled(currentScrollY > 20)
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileMenuOpen]);
 
-      // 2. Handle disappear/reappear behavior based on scroll direction
-      if (currentScrollY > lastScrollY.current && currentScrollY > 120) {
-        // Scrolling DOWN & past the 120px threshold -> Hide Navbar
-        setIsHidden(true)
-      } else if (currentScrollY < lastScrollY.current) {
-        // Scrolling UP -> Reveal Navbar
-        setIsHidden(false)
-      }
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
-      lastScrollY.current = currentScrollY
-    }
-
-    // Set initial scroll state
-    onScroll()
-    
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  React.useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : ''
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [menuOpen])
+  const isActive = (href: string) =>
+    href !== "/#terms" && href !== "/" && pathname?.startsWith(href);
 
   return (
-    <>
-      <style>{`
-        .site-header {
-          position: fixed;
-          top: 0;
-          left: 0;
-          width: 100%;
-          z-index: 99999;
-          /* Smoothly animate both the vertical slide (disappear) and background transparency */
-          transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
-                      background 0.3s ease, 
-                      box-shadow 0.3s ease, 
-                      backdrop-filter 0.3s ease, 
-                      border-color 0.3s ease;
-        }
-        .top-lace-border {
-          width: 100%;
-          height: 4px;
-          background: linear-gradient(90deg, var(--rose, #D48B9D) 0%, #E8C4CE 50%, var(--rose, #D48B9D) 100%);
-          transition: opacity .3s ease;
-        }
-        nav .full-wrap {
-          width: 100%;
-          max-width: 1600px;
-          margin: 0 auto;
-          padding: 0 clamp(24px, 5vw, 64px);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          height: 84px;
-        }
-        .logo {
-          display: flex;
-          align-items: center;
-          text-decoration: none;
-          transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          z-index: 10;
-        }
-        .logo:hover, .logo:active { transform: scale(1.04); }
-        .logo img {
-          height: 56px;
-          width: auto;
-          object-fit: contain;
-        }
-        
-        /* --- GROUPED RIGHT NAVIGATION --- */
-        .nav-right {
-          display: flex;
-          align-items: center;
-          gap: clamp(28px, 3.5vw, 48px);
-        }
-        .nav-links {
-          display: flex;
-          align-items: center;
-          gap: clamp(24px, 2.8vw, 38px);
-          font-size: .92rem;
-          font-weight: 400;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        }
-        .nav-links a {
-          text-decoration: none;
-          color: var(--mocha, #3D2C2E);
-          transition: color .2s ease;
-          position: relative;
-        }
-        .nav-links a:hover {
-          color: var(--rose-deep, #A9647C);
-        }
-        
-        /* Subtle underline hover effect */
-        .nav-links a::after {
-          content: '';
-          position: absolute;
-          width: 0;
-          height: 1px;
-          bottom: -4px;
-          left: 0;
-          background-color: var(--rose-deep, #A9647C);
-          transition: width .25s ease;
-        }
-        .nav-links a:hover::after {
-          width: 100%;
-        }
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
+        isScrolled
+          ? "bg-[#FFF5F8]/95 backdrop-blur-md shadow-[0_2px_20px_rgba(194,84,122,0.08)] border-[#F2C4D4]"
+          : "bg-[#FFF5F8] border-[#F2C4D4]"
+      }`}
+    >
+      <div className="flex items-center justify-between h-[72px] lg:h-[82px] px-6 lg:px-20">
 
-        .nav-cta {
-          background: rgba(255, 255, 255, 0.65);
-          backdrop-filter: blur(4px);
-          color: var(--rose-deep, #A9647C);
-          border: 1.5px solid var(--rose, #D48B9D);
-          padding: 12px 32px;
-          border-radius: 999px;
-          font-family: 'Cormorant Garamond', serif;
-          font-style: italic;
-          font-size: 1.15rem;
-          font-weight: 600;
-          letter-spacing: .02em;
-          text-transform: none;
-          text-decoration: none;
-          transition: all .25s cubic-bezier(0.34, 1.56, 0.64, 1);
-          white-space: nowrap;
-        }
-        .nav-cta:hover {
-          background: var(--rose-deep, #A9647C);
-          color: #fff;
-          border-color: var(--rose-deep, #A9647C);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 20px -6px rgba(184, 107, 125, 0.45);
-        }
-        
-        .nav-burger {
-          display: none;
-          background: none;
-          border: none;
-          padding: 10px;
-          margin: -10px;
-          cursor: pointer;
-          color: var(--mocha, #3D2C2E);
-          z-index: 10;
-        }
-        .nav-burger svg { display: block; width: 26px; height: 26px; }
-
-        /* --- MOBILE MENU --- */
-        .mobile-menu {
-          position: fixed;
-          inset: 0;
-          background: #FFFDF9;
-          z-index: 99998;
-          display: flex;
-          flex-direction: column;
-          padding: 110px clamp(28px, 6vw, 56px) 40px;
-          gap: 6px;
-          transform: translateY(-16px);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity .3s ease, transform .3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mobile-menu.open {
-          opacity: 1;
-          transform: translateY(0);
-          pointer-events: auto;
-        }
-        .mobile-menu a {
-          text-decoration: none;
-          color: var(--mocha, #3D2C2E);
-          font-family: 'Cormorant Garamond', serif;
-          font-size: 2rem;
-          font-style: italic;
-          padding: 16px 4px;
-          border-bottom: 1px solid var(--line, #F2E6E8);
-          min-height: 48px;
-          display: flex;
-          align-items: center;
-          transition: color .2s ease;
-        }
-        .mobile-menu a:active, .mobile-menu a:hover { color: var(--rose-deep, #A9647C); }
-        .mobile-menu .nav-cta {
-          margin-top: 32px;
-          justify-content: center;
-          display: flex;
-          text-align: center;
-          font-size: 1.4rem;
-          padding: 16px 32px;
-        }
-
-        @media (max-width: 960px) {
-          .nav-right { display: none; }
-          .nav-burger { display: flex; align-items: center; justify-content: center; }
-          .logo img { height: 46px; }
-          nav .full-wrap { height: 72px; }
-        }
-      `}</style>
-
-      <header
-        className="site-header"
-        style={{
-          /* 1. DISAPPEAR EFFECT: Slides up (-100%) when scrolling down, unless mobile menu is open */
-          transform: isHidden && !menuOpen ? 'translateY(-100%)' : 'translateY(0)',
-          
-          /* 2. BACKGROUND: Transparent glassmorphism (0.70 opacity) when scrolled, solid background (#FFFDF9) at y-0! */
-          background: isScrolled ? 'rgba(255, 253, 249, 0.70)' : '#FFFDF9',
-          backdropFilter: isScrolled ? 'blur(16px)' : 'none',
-          WebkitBackdropFilter: isScrolled ? 'blur(16px)' : 'none',
-          
-          boxShadow: isScrolled ? '0 4px 24px -8px rgba(61, 44, 46, 0.08)' : 'none',
-          borderBottom: isScrolled ? '1px solid rgba(242, 230, 232, 0.6)' : '1px solid transparent',
-        }}
-      >
-        <div className="top-lace-border" style={{ opacity: isScrolled ? 1 : 0 }} />
-        <nav>
-          <div className="full-wrap">
-            <Link href="/" className="logo" onClick={() => setMenuOpen(false)}>
-              <img src="/logo/5.png" alt="Gigi's Rentals" />
-            </Link>
-
-            <div className="nav-right">
-              <div className="nav-links">
-                <Link href="/about">About Us</Link>
-                <Link href="/#terms">Guidelines</Link>
-                <Link href="/size-guide">Size Guide</Link>
-              </div>
-
-              <Link
-                href={FB_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-cta"
-              >
-                Rent a Dress
-              </Link>
-            </div>
-
-            <button
-              className="nav-burger"
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen((v) => !v)}
-            >
-              {menuOpen ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M5 5l14 14M19 5L5 19" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                  <path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </nav>
-      </header>
-
-      <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
-        <Link href="/about" onClick={() => setMenuOpen(false)}>About Us</Link>
-        <Link href="/#terms" onClick={() => setMenuOpen(false)}>Guidelines</Link>
-        <Link href="/size-guide" onClick={() => setMenuOpen(false)}>Size Guide</Link>
+        {/* LEFT — Logo */}
         <Link
-          href={FB_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="nav-cta"
-          onClick={() => setMenuOpen(false)}
+          href="/"
+          className="transition-transform duration-300 hover:scale-105 active:scale-95 inline-block shrink-0"
+          onClick={() => setMobileMenuOpen(false)}
         >
-          Rent a Dress
+          <span className="whitespace-nowrap">
+            <span
+              className="font-[family-name:var(--font-parisienne)] text-[2.2rem] lg:text-[3rem] text-[#C2547A]"
+              style={{ WebkitTextStroke: "0.6px #C2547A" }}
+            >
+              Gigi&apos;s{" "}
+            </span>
+            <span
+              className="font-[family-name:var(--font-parisienne)] text-[2.2rem] lg:text-[3rem] text-[#E8A0B8]"
+            >
+              Rentals
+            </span>
+          </span>
         </Link>
+
+        {/* CENTER — Nav links */}
+        <nav className="hidden lg:flex items-center gap-9">
+          {NAV_LINKS.map(({ label, href }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={label}
+                href={href}
+                className={`group relative text-[11px] font-semibold tracking-widest uppercase transition-colors duration-300 whitespace-nowrap py-2 ${
+                  active ? "text-[#C2547A]" : "text-[#B06080] hover:text-[#C2547A]"
+                }`}
+              >
+                {label}
+                <span
+                  className={`absolute -bottom-0.5 left-0 h-px bg-[#E8A0B8] transition-all duration-300 ${
+                    active ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* RIGHT — CTA */}
+        <div className="hidden lg:flex items-center shrink-0">
+          <Link
+            href="/collections"
+            className="rounded-full border border-[#E8A0B8] bg-gradient-to-r from-[#F9E4EE] to-[#F2D0E4] px-8 py-3.5 text-[13px] font-bold tracking-widest uppercase text-[#C2547A] transition-all duration-300 hover:scale-105 hover:shadow-[0_4px_20px_rgba(194,84,122,0.2)] hover:from-[#F2D0E4] hover:to-[#EAB8D0] active:scale-95 flex items-center gap-2 whitespace-nowrap"
+          >
+            Rent a Dress
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+
+        {/* Mobile toggle */}
+        <button
+          className="lg:hidden text-[#C2547A] z-50 p-2 -mr-2"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileMenuOpen}
+        >
+          {mobileMenuOpen ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-6 h-6">
+              <path d="M5 5l14 14M19 5L5 19" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-6 h-6">
+              <path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17" />
+            </svg>
+          )}
+        </button>
       </div>
-    </>
-  )
+
+      {/* Mobile Dropdown */}
+      {mobileMenuOpen && (
+        <div className="absolute top-full left-0 right-0 min-h-[calc(100vh-72px)] bg-[#FFF5F8] px-6 py-6 flex flex-col gap-1 lg:hidden border-t border-[#F2C4D4] z-40">
+          {NAV_LINKS.map(({ label, href }) => {
+            const active = isActive(href);
+            return (
+              <Link
+                key={label}
+                href={href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`text-[14px] font-bold tracking-widest uppercase border-b border-[#F2C4D4] py-5 transition-colors flex items-center justify-between ${
+                  active ? "text-[#C2547A]" : "text-[#B06080] hover:text-[#C2547A]"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+
+          <Link
+            href="/collections"
+            onClick={() => setMobileMenuOpen(false)}
+            className="mt-8 mx-auto w-full max-w-sm rounded-full border border-[#E8A0B8] bg-gradient-to-r from-[#F9E4EE] to-[#F2D0E4] px-6 py-4 text-center text-[13px] font-bold tracking-widest uppercase text-[#C2547A] active:scale-95 transition-transform flex items-center justify-center gap-2"
+          >
+            Rent a Dress
+            <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      )}
+    </header>
+  );
 }

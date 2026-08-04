@@ -2,7 +2,6 @@
 
 import React from 'react'
 import Link from 'next/link'
-import Navbar from '@/app/components/Navbar'
 import Footer from '@/app/components/Footer'
 import page from '../page'
 
@@ -87,7 +86,8 @@ export default function AboutPage() {
           --shadow-sm: 0 2px 4px rgba(74, 51, 55, 0.07), 0 8px 20px -8px rgba(184, 107, 125, 0.22);
           --shadow-md: 0 4px 8px rgba(74, 51, 55, 0.08), 0 16px 36px -12px rgba(184, 107, 125, 0.28);
         }
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+.hero *, .guidelines-section *, .folder * { margin: 0; padding: 0; }
 
         @keyframes coquette-wiggle {
           0%, 100% { transform: translateY(-3px) rotate(0deg) scale(1.02); }
@@ -409,8 +409,6 @@ export default function AboutPage() {
         }
       `}</style>
 
-      <Navbar />
-
       {/* --- HERO SECTION --- */}
       <section className="about-hero">
         <div className="full-wrap">
@@ -419,9 +417,10 @@ export default function AboutPage() {
               <CoquetteBow width={20} height={14} style={{ color: 'var(--rose-deep)' }} />
               The Heart Behind The Atelier
             </span>
-            <h1>Weaving Timeless Grace &amp; Modern Silhouette</h1>
+<h1>Designed for Moments You&apos;ll Never Forget</h1>
             <p className="subtitle">
-              Gigi&apos;s Rentals was born from a simple desire: to make every woman feel extraordinary without the compromise of generic sizing or uninspired design.
+              Gigi&apos;s Rentals is a premium dress rental boutique offering carefully curated gowns
+              that celebrate femininity, confidence, and timeless elegance.
             </p>
           </div>
         </div>
@@ -431,16 +430,20 @@ export default function AboutPage() {
       <section className="story-section">
         <div className="full-wrap">
           <div className="story-grid">
-            <div className="story-text">
-              <h2>A Passion for Fit, Fabric &amp; Feeling</h2>
+<div className="story-text">
+              <h2>Luxury Isn&apos;t About Owning More</h2>
               <p>
-                Whether walking across a stage, attending a milestone celebration, or honoring cultural traditions, what you wear sets the rhythm of your confidence. Too often, finding the perfect formal wear feels transactional and overwhelming.
+                We believe luxury isn&apos;t about owning more — it&apos;s about wearing the perfect
+                piece for life&apos;s most meaningful occasions. From intimate celebrations to grand
+                events, our collection is thoughtfully selected to help every woman look and feel
+                her absolute best.
               </p>
               <div className="quote">
-                &ldquo;We wanted to build an intimate space where finding your dress feels like a celebration in itself—quiet, bespoke, and tailored entirely around you.&rdquo;
+                &ldquo;Because every special occasion deserves a dress as unforgettable as the memory itself.&rdquo;
               </div>
               <p>
-                From Chantilly lace gowns to modern Vietnamese traditional silhouettes, every piece in our showroom is selected for its exceptional drape, intricate detailing, and romantic charm. We don&apos;t just rent dresses; we curate unforgettable moments.
+                With exceptional service and attention to detail, we&apos;re committed to making
+                every fitting, every dress, and every moment effortlessly beautiful.
               </p>
             </div>
 
@@ -486,13 +489,11 @@ export default function AboutPage() {
             </p>
             <div className="signature">With all our love, Gigi</div>
             
-            <Link
-              href="/booking"
-              target="_blank"
-              rel="noopener noreferrer"
+<Link
+              href="/collections"
               className="gg-btn-primary"
             >
-              Book Your Fitting Appointment ♡
+              Browse Our Collection ♡
             </Link>
           </div>
         </div>

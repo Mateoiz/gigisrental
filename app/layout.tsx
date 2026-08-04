@@ -1,7 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Parisienne } from "next/font/google";
+import localFont from "next/font/local";
+
+const parisienne = Parisienne({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-parisienne",
+});
+
+const kapakana = localFont({
+  src: "../public/fonts/Kapakana-VariableFont_wght.ttf",
+  variable: "--font-kapakana",
+  display: "swap",
+});
 import "./globals.css";
 import SplashScreen from "./components/SplashScreen";
+import Navbar from "./components/Navbar"; // adjust path as needed
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -58,12 +73,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
+<html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+className={`${geistSans.variable} ${geistMono.variable} ${parisienne.variable} ${kapakana.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <SplashScreen />
+                <Navbar />          {/* ← add this */}
+
         {children}
       </body>
     </html>
