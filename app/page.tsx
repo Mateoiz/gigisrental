@@ -121,7 +121,10 @@ function Hero({ onExploreRules, onExploreEtiquette }: { onExploreRules: () => vo
         <button 
           type="button" 
           className="scroll-indicator" 
-          onClick={() => document.getElementById('discover')?.scrollIntoView({ behavior: 'smooth' })}
+          onClick={() => {
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            document.getElementById('discover')?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' })
+          }}
           aria-label="Scroll down to discover"
         >
           <span className="scroll-text">Scroll to Discover</span>
@@ -238,11 +241,15 @@ function CollectionPreview() {
                   className="collection-card-photo collection-card-photo-hover"
                   style={{ backgroundImage: `url('${dress.hoverImage}')` }}
                 />
+                <span className="collection-card-charm" aria-hidden="true">
+                  <CoquetteBow width={22} height={14} style={{ color: 'var(--rose-deep)' }} />
+                </span>
                 <span className="collection-card-view">
                   <CoquetteBow width={14} height={9} style={{ color: 'var(--rose-deep)' }} />
                   View the piece
                 </span>
               </div>
+              <span className="sr-only">{`View details for ${dress.name}`}</span>
 <div className="collection-card-info">
                 <span className="collection-card-name">{dress.name}</span>
                 <span className="collection-card-rule" aria-hidden="true" />
@@ -293,6 +300,13 @@ function GuidelinesFolder({
   }
 
   const currentData = TAB_DATA[activeTab]
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      panelRef.current?.focus()
+    }
+  }, [isOpen, activeTab])
 
   return (
     <div className="folder">
@@ -352,10 +366,11 @@ function GuidelinesFolder({
           )}
 
           <div
+            ref={panelRef}
             role="tabpanel"
             id={`panel-${activeTab}`}
             aria-labelledby={`tab-${activeTab}`}
-            tabIndex={0}
+            tabIndex={-1}
           >
             <TabPanel data={currentData} />
           </div>
@@ -379,11 +394,11 @@ export default function RulesPage() {
     document.getElementById('guidelines')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  return (
+return (
     <>
-      <style>{PAGE_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: PAGE_STYLES }} />
 
-<Hero
+      <Hero
         onExploreRules={() => goToGuidelines('terms')}
         onExploreEtiquette={() => goToGuidelines('how')}
       />
@@ -463,6 +478,10 @@ const PAGE_STYLES = `
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
 .hero-splash *, .hero-info-wrapper *, .guidelines-section *, .folder *, .about-section *, .collection-section * { margin: 0; padding: 0; }
 
 /* --- QoL Enhancements: Smooth scroll, Custom scrollbar, Custom selection --- */
@@ -540,7 +559,9 @@ a { color: inherit; text-decoration: none; }
   background-size: cover;
   background-position: center;
   z-index: -1;
-  background-attachment: fixed; 
+}
+@media (min-width: 768px) and (hover: hover) {
+  .hero-photo { background-attachment: fixed; }
 }
 /* Floating Sparkle Animations */
 .sparkle-container {
@@ -719,18 +740,20 @@ a { color: inherit; text-decoration: none; }
   background: transparent;
   transition: transform .3s var(--ease-pop);
 }
-.collection-card:hover { transform: translateY(-6px); }
+.collection-card:hover { transform: translateY(-6px) rotate(-.6deg); }
 .collection-card-photo-wrap {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   background-color: #FBF9F6;
-  border-radius: 2px;
-  border: 1px solid transparent;
-  transition: border-color .3s ease;
+  border-radius: 18px;
+  border: 1px solid rgba(169, 100, 124, .25);
+  box-shadow: var(--shadow-xs);
+  transition: border-color .3s ease, box-shadow .3s ease;
 }
 .collection-card:hover .collection-card-photo-wrap {
-  border-color: var(--rose-deep);
+  border: 1px dashed var(--rose-deep);
+  box-shadow: var(--shadow-sm);
 }
 .collection-card-photo {
   position: absolute; inset: 0;
@@ -742,6 +765,17 @@ a { color: inherit; text-decoration: none; }
 .collection-card-photo-hover { opacity: 0; z-index: 2; transform: scale(1.04); }
 .collection-card:hover .collection-card-photo-base { opacity: 0; }
 .collection-card:hover .collection-card-photo-hover { opacity: 1; transform: scale(1); }
+.collection-card-charm {
+  position: absolute; top: 12px; left: 12px; z-index: 3;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,.88); backdrop-filter: blur(3px);
+  box-shadow: var(--shadow-xs);
+  opacity: 0; transform: scale(.7) rotate(-12deg);
+  transition: opacity .3s ease, transform .3s var(--ease-pop);
+}
+.collection-card:hover .collection-card-charm { opacity: 1; transform: scale(1) rotate(0deg); }
+
 .collection-card-view {
   position: absolute; left: 50%; bottom: 14px; z-index: 3;
   transform: translate(-50%, 10px);
@@ -761,7 +795,9 @@ a { color: inherit; text-decoration: none; }
   font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600;
   font-size: 1.25rem; color: var(--mocha);
   text-align: center;
+  transition: color .3s ease;
 }
+.collection-card:hover .collection-card-name { color: var(--rose-deep); }
 .collection-card-rule {
   width: 28px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--rose), transparent);
@@ -784,6 +820,17 @@ a { color: inherit; text-decoration: none; }
   .collection-card {
     flex: 0 0 75%; /* Shows a peek of the next dress */
     scroll-snap-align: center;
+  }
+  .collection-section::after {
+    content: '← swipe to browse →';
+    display: block;
+    text-align: center;
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--mocha-soft);
+    opacity: .6;
+    margin-top: 4px;
   }
 }
 
@@ -950,9 +997,41 @@ a { color: inherit; text-decoration: none; }
   .hero-cta-row .btn { width: 100%; justify-content: center; }
 }
 @media (max-width: 479px) {
-  .folder-tab { min-height: 52px; padding: 14px 18px; }
   .panel-card, .panel-list li { padding: 18px; }
 }
+
+/* --- App-like Mobile Layout for ToS Folder --- */
+@media (max-width: 760px) {
+  .folder-tabs {
+    padding: 0 16px 16px;
+    gap: 10px;
+  }
+  .folder-tab {
+    border-radius: 999px;
+    margin: 0;
+    padding: 10px 24px;
+    min-height: auto;
+    border: 1px solid rgba(169, 100, 124, 0.2);
+    background: #fff;
+  }
+  .folder-tab::before { 
+    display: none; /* Hide the 3D folder tab effect */
+  }
+  .folder-tab.active {
+    background: var(--tab-accent, var(--rose-deep));
+    color: #fff;
+    border-color: transparent;
+    padding: 10px 24px;
+    margin-bottom: 0;
+    box-shadow: 0 4px 12px -4px var(--tab-accent, var(--rose-deep));
+  }
+  .folder-stack::before, .folder-stack::after { 
+    display: none; /* Hide 3D stack effect */
+  }
+  .folder-closed { border-radius: 20px; }
+  .folder-body { border-radius: 20px; padding: 24px 20px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

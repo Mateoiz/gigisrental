@@ -105,11 +105,11 @@ document.body.style.overflow = 'unset'
     fetchDress()
   }, [slug])
 
-  return (
+return (
     <>
-      <style>{DRESS_STYLES}</style>
+<style dangerouslySetInnerHTML={{ __html: DRESS_STYLES }} />
 
-<section className="dress-detail-section">
+      <section className="dress-detail-section">
         <div className="wrap">
           
           {loading && (
