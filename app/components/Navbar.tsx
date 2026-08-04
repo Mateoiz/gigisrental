@@ -15,7 +15,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-
+  
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     handleScroll();
@@ -34,6 +34,10 @@ export default function Navbar() {
 
   const isActive = (href: string) =>
     href !== "/#terms" && href !== "/" && pathname?.startsWith(href);
+
+ if (pathname?.startsWith('/admin') || pathname?.startsWith('/dshbrdlogin')) {
+    return null
+  }
 
   return (
     <header

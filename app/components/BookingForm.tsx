@@ -58,7 +58,7 @@ export default function BookingForm() {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null } | null>(null)
+const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null);
   const [dressLoading, setDressLoading] = useState(!!dressSlug)
 
   const [booking, setBooking] = useState<BookingState>({
@@ -72,19 +72,22 @@ export default function BookingForm() {
     notes: '',
   })
 
-  useEffect(() => {
+useEffect(() => {
     if (!dressSlug) return
     const fetchDress = async () => {
       const { data } = await supabase
         .from('dresses')
-        .select('id, name, category')
+        .select('id, name, category, is_available')
         .eq('slug', dressSlug)
         .single()
 
       if (data) {
         setPreselectedDress(data)
-        setBooking((b) => ({ ...b, category: data.name }))
-        setStep(1) // skip Style step, jump to Date
+        // Only auto-fill and jump to Date step if the dress is actually available
+        if (data.is_available) {
+          setBooking((b) => ({ ...b, category: data.name }))
+          setStep(1) 
+        }
       }
       setDressLoading(false)
     }
@@ -109,7 +112,7 @@ const next = async () => {
       setSubmitting(true)
       setSubmitError(null)
 
-      const { error } = await supabase.from('bookings').insert({
+const { error } = await supabase.from('bookings').insert({
         dress_id: preselectedDress?.id ?? null,
         category: booking.category,
         booking_date: booking.date,
@@ -120,6 +123,14 @@ const next = async () => {
         phone: booking.phone,
         notes: booking.notes || null,
       })
+
+      // If the booking was successful and they booked a specific dress, mark it as unavailable
+      if (!error && preselectedDress?.id) {
+        await supabase
+          .from('dresses')
+          .update({ is_available: false })
+          .eq('id', preselectedDress.id)
+      }
 
       setSubmitting(false)
 
@@ -544,11 +555,22 @@ const next = async () => {
           margin-top: 22px;
         }
       `}</style>
-
 <div className="bk-root">
         {dressLoading && <p style={{ textAlign: 'center', color: 'var(--mocha-soft)' }}>Loading...</p>}
 
-        {!dressLoading && preselectedDress && !submitted && (
+        {!dressLoading && preselectedDress && !preselectedDress.is_available ? (
+          <div className="bk-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <h2 style={{ fontSize: '2rem', fontStyle: 'italic', marginBottom: '10px' }}>Currently Unavailable</h2>
+            <p style={{ color: 'var(--mocha-soft)', maxWidth: '400px', margin: '0 auto 30px', lineHeight: '1.6' }}>
+              We're so sorry, but <strong>{preselectedDress.name}</strong> is currently being rented by another client and is unavailable for new bookings right now.
+            </p>
+            <a href="/collections" className="bk-btn bk-btn-ghost" style={{ textDecoration: 'none' }}>
+              Browse other dresses
+            </a>
+          </div>
+        ) : (
+          <>
+            {!dressLoading && preselectedDress && !submitted && (
           <p style={{ textAlign: 'center', color: 'var(--rose-deep)', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.1rem', marginBottom: '20px' }}>
             Booking a fitting for <strong>{preselectedDress.name}</strong>
           </p>
@@ -775,13 +797,15 @@ const next = async () => {
                 {submitting ? 'Submitting...' : step === STEPS.length - 1 ? 'Confirm Booking' : 'Continue'}
               </button>
             </div>
-            {submitError && (
+{submitError && (
               <p style={{ color: 'var(--rose-deep)', textAlign: 'center', marginTop: '14px', fontSize: '.85rem' }}>
                 {submitError}
               </p>
             )}
           </div>
         )}
+        </>
+      )}
       </div>
     </>
   )

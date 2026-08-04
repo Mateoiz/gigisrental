@@ -117,14 +117,19 @@ function Hero({ onExploreRules, onExploreEtiquette }: { onExploreRules: () => vo
           <span className="sparkle s4">✧</span>
         </div>
 
-        {/* High-End Dropping Line Scroll Indicator */}
-        <div className="scroll-indicator" aria-hidden="true">
+{/* High-End Dropping Line Scroll Indicator */}
+        <button 
+          type="button" 
+          className="scroll-indicator" 
+          onClick={() => document.getElementById('discover')?.scrollIntoView({ behavior: 'smooth' })}
+          aria-label="Scroll down to discover"
+        >
           <span className="scroll-text">Scroll to Discover</span>
           <div className="scroll-line"></div>
-        </div>
+        </button>
       </section>
 
-      <section className="hero-info-wrapper">
+      <section className="hero-info-wrapper" id="discover">
         <div 
           ref={contentRef} 
           className={`hero-content ${isVisible ? 'pop-up-visible' : 'pop-up-hidden'}`}
@@ -568,7 +573,16 @@ a { color: inherit; text-decoration: none; }
   gap: 16px;
   z-index: 2;
   opacity: 0;
-  animation: fadeIn 2s ease-out 1s forwards; /* 1s delay so it fades in after the image */
+  animation: fadeIn 2s ease-out 1s forwards;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+.scroll-indicator:focus-visible .scroll-text {
+  outline: 2px solid var(--rose);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 .scroll-text {
   color: #fff;
@@ -693,24 +707,30 @@ a { color: inherit; text-decoration: none; }
 .collection-cta { display: flex; justify-content: center; margin-top: clamp(36px, 4vw, 52px); }
 .collection-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; margin-bottom: clamp(32px, 4vw, 48px); }
 .collection-lead { max-width: 520px; }
-.collection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(18px, 2.5vw, 26px); }
+.collection-grid { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+  gap: clamp(18px, 2.5vw, 26px); 
+}
 .collection-card {
   display: flex; flex-direction: column;
-  border-radius: 22px; overflow: hidden;
-  background: var(--card);
-  border: 1px solid rgba(169,100,124,.35);
-  box-shadow: var(--shadow-xs);
-  transition: transform .3s var(--ease-pop), box-shadow .3s ease, border-color .3s ease;
+  border-radius: 4px; /* Sharper editorial edges */
+  overflow: hidden;
+  background: transparent;
+  transition: transform .3s var(--ease-pop);
 }
-.collection-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); border-color: var(--rose-deep); }
+.collection-card:hover { transform: translateY(-6px); }
 .collection-card-photo-wrap {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  background-color: #ffffff;
-  margin: 10px 10px 0;
-  border-radius: 16px;
-  border: 1px solid var(--tulle-dot);
+  background-color: #FBF9F6;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  transition: border-color .3s ease;
+}
+.collection-card:hover .collection-card-photo-wrap {
+  border-color: var(--rose-deep);
 }
 .collection-card-photo {
   position: absolute; inset: 0;
@@ -739,7 +759,7 @@ a { color: inherit; text-decoration: none; }
 .collection-card-info { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 14px 20px; }
 .collection-card-name {
   font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 600;
-  font-size: 1.15rem; color: var(--mocha);
+  font-size: 1.25rem; color: var(--mocha);
   text-align: center;
 }
 .collection-card-rule {
@@ -748,6 +768,24 @@ a { color: inherit; text-decoration: none; }
   transition: width .3s ease;
 }
 .collection-card:hover .collection-card-rule { width: 48px; }
+
+@media (max-width: 760px) {
+  /* Mobile swipeable carousel for collection */
+  .collection-grid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin: 0 -20px;
+    padding: 0 20px 24px;
+    scrollbar-width: none;
+  }
+  .collection-grid::-webkit-scrollbar { display: none; }
+  .collection-card {
+    flex: 0 0 75%; /* Shows a peek of the next dress */
+    scroll-snap-align: center;
+  }
+}
 
 /* ---- guidelines section / folder tabs ---- */
 
