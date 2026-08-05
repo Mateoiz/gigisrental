@@ -112,15 +112,6 @@ const CONTACT_STYLES = `
   --shadow-sm: 0 4px 12px -2px rgba(169, 100, 124, .18);
   --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* Grid & Fabric Textures */
-  --grid-color: rgba(212, 139, 157, 0.35);
-  --grid-pattern: 
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  --silk-gradient: linear-gradient(180deg, var(--porcelain) 0%, #FFF9FA 50%, #FFFDF9 100%);
-  --tulle-pattern: radial-gradient(var(--tulle-dot) 1.5px, transparent 1.5px);
-}
-
 .page-wrapper {
   background-color: var(--porcelain);
   background-image: var(--grid-pattern);

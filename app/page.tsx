@@ -80,48 +80,6 @@ function TabPanel({ data }: { data: TabContentData }) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Global Tailor Stitch Overlay                                              */
-/* -------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------- */
-/*  Global Tailor Stitch Overlay                                              */
-/* -------------------------------------------------------------------------- */
-function GlobalStitches() {
-  return (
-    <div className="stitch-canvas" aria-hidden="true">
-      {/* Left Wall Stitches */}
-      <div className="stitch-side stitch-left">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="thread-left" width="100%" height="800" patternUnits="userSpaceOnUse">
-              {/* Outer Thread */}
-              <path d="M 80 0 C 230 250, -70 550, 80 800" className="stitch-path" />
-              {/* Inner Thread */}
-              <path d="M 230 0 C 80 250, 380 550, 230 800" className="stitch-path" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#thread-left)" />
-        </svg>
-      </div>
-      
-      {/* Right Wall Stitches */}
-      <div className="stitch-side stitch-right">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="thread-right" width="100%" height="800" patternUnits="userSpaceOnUse">
-              {/* Inner Thread */}
-              <path d="M 170 0 C 320 250, 20 550, 170 800" className="stitch-path" />
-              {/* Outer Thread */}
-              <path d="M 320 0 C 170 250, 470 550, 320 800" className="stitch-path" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#thread-right)" />
-        </svg>
-      </div>
-    </div>
-  )
-}
-
-/* -------------------------------------------------------------------------- */
 /*  Hero - Split into Splash Image & Scroll-Revealed Content                  */
 /* -------------------------------------------------------------------------- */
 
@@ -213,8 +171,70 @@ function Hero({ onExploreRules, onExploreEtiquette }: { onExploreRules: () => vo
   )
 }
 function AboutSection() {
+  const [isVisible, setIsVisible] = useState(false)
+  const [parallax, setParallax] = useState(0)
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setIsVisible(true)
+      },
+      { threshold: 0.2 }
+    )
+    if (sectionRef.current) observer.observe(sectionRef.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (prefersReduced) return
+
+    let ticking = false
+    const handleScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        if (sectionRef.current) {
+          const rect = sectionRef.current.getBoundingClientRect()
+          const viewportH = window.innerHeight
+          // -1 (section below viewport) -> 0 (centered) -> 1 (section above viewport)
+          const progress = (viewportH - rect.top) / (viewportH + rect.height) - 0.5
+          setParallax(progress)
+        }
+        ticking = false
+      })
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const shards = [
+    { img: '/floaties/187.jpg', className: 'shard-1', speed: 34 },
+    { img: '/floaties/192.jpg', className: 'shard-2', speed: -22 },
+    { img: '/floaties/193.jpg', className: 'shard-3', speed: 28 },
+    { img: '/floaties/195.jpg', className: 'shard-4', speed: -30 },
+    { img: '/floaties/198.jpg', className: 'shard-5', speed: 20 },
+    { img: '/floaties/199.jpg', className: 'shard-6', speed: -25 },
+  ]
+
   return (
-    <section className="about-section" id="about">
+    <section className="about-section" id="about" ref={sectionRef}>
+      <div className="about-shards" aria-hidden="true">
+        {shards.map((shard, i) => (
+          <div
+            key={shard.className}
+            className={`about-shard ${shard.className} ${isVisible ? 'shard-in' : ''}`}
+            style={{
+              backgroundImage: `url('${shard.img}')`,
+              transitionDelay: `${i * 0.12}s`,
+              '--parallax-y': `${parallax * shard.speed}px`,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
       <div className="wrap about-wrap">
         <span className="eyebrow-pill">
           <CoquetteBow width={18} height={12} style={{ color: 'var(--rose-deep)' }} />
@@ -487,8 +507,6 @@ return (
     <div className="page-wrapper">
       <style dangerouslySetInnerHTML={{ __html: PAGE_STYLES }} />
 
-      <GlobalStitches />
-
       <Hero
         onExploreRules={() => goToGuidelines('terms')}
         onExploreEtiquette={() => goToGuidelines('how')}
@@ -654,51 +672,6 @@ a { color: inherit; text-decoration: none; }
   overflow: hidden;
 }
 
-.stitch-canvas {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 10; /* Boosted z-index forces stitches over the hero text block's solid background */
-}
-
-.stitch-side {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 400px; /* Constrains threads to the screen edges */
-  max-width: 30vw; /* Keeps threads out of the main text area on smaller screens */
-  opacity: 0.8;
-}
-.stitch-left {
-  left: 0;
-}
-.stitch-right {
-  right: 0;
-}
-
-/* --- Mobile Optimization for Stitches --- */
-@media (max-width: 900px) {
-  .stitch-canvas {
-    z-index: 0; /* Drops the threads behind the content so text remains readable */
-  }
-  .stitch-side {
-    max-width: none; /* Removes the 30vw limit to prevent SVG clipping */
-    width: 100vw; /* Let the curves flow naturally across the device */
-    opacity: 0.25; /* Soften into a delicate sketchpad watermark behind the text */
-  }
-  .stitch-left svg {
-    /* Push the left threads slightly wider on mobile for a better intersection */
-    transform: translateX(-15%);
-  }
-}
-.stitch-path {
-  fill: none;
-  stroke: var(--rose-deep);
-  stroke-width: 2.5;
-  stroke-dasharray: 8 10; /* Matches the dashed tailor chalk/thread look */
-  opacity: 0.35;
-  stroke-linecap: round;
-}
 
 /* ---- hero: splash & info ---- */
 .hero-splash {
@@ -887,10 +860,56 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---- about section ---- */
+.about-section {
+  position: relative;
+  overflow: visible;
+  padding-top: clamp(20px, 3vw, 40px);
+  padding-bottom: clamp(20px, 3vw, 40px);
+}
+.about-shards {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.about-shard {
+  position: absolute;
+  background-size: cover;
+  background-position: center;
+  border-radius: 3px;
+  box-shadow: 0 14px 28px -10px rgba(61, 44, 46, .2);
+  border: 5px solid #fff;
+  opacity: 0;
+  transform: translateY(30px) scale(.9) rotate(var(--shard-rot, 0deg));
+  transition: opacity .7s ease, transform .7s var(--ease-pop);
+}
+.about-shard.shard-in {
+  opacity: .7; /* muted so text stays the focal point */
+  transform: translateY(0) scale(1) rotate(var(--shard-rot, 0deg));
+}
+.about-shard:hover { opacity: .95; }
+/* Genuinely scattered — independent x/y per shard, no left/right mirroring, no shared rows */
+/* Big anchors close to the text, each with a small satellite tucked nearby */
+.shard-1 { --shard-rot: -9deg; width: 175px; height: 218px; top: 2%;   left: 9%;   z-index: 1; }
+.shard-2 { --shard-rot: 6deg;  width: 72px;  height: 90px;  top: 26%;  left: 21%;  z-index: 2; }
+.shard-3 { --shard-rot: 8deg;  width: 165px; height: 206px; top: 6%;   right: 8%;  z-index: 1; }
+.shard-4 { --shard-rot: -5deg; width: 78px;  height: 98px;  top: 34%;  right: 22%; z-index: 2; }
+.shard-5 { --shard-rot: -6deg; width: 140px; height: 175px; top: 58%;  left: 14%;  z-index: 1; }
+.shard-6 { --shard-rot: 5deg;  width: 66px;  height: 82px;  top: 52%;  right: 16%; z-index: 2; }
+
+@media (max-width: 900px) {
+  .about-shards { display: none; } /* keeps mobile text uncluttered */
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-shard { transition: none; }
+}
+
 .about-wrap { 
   display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; 
   max-width: 800px;
   padding: clamp(40px, 6vw, 64px) 0;
+  position: relative;
+  z-index: 3; /* keeps text above the shards even when they drift closer in */
 }
 .about-heading { 
   font-size: clamp(2.2rem, 4.5vw, 3.2rem); 
