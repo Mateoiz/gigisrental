@@ -28,8 +28,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://gigisrental.com"),
-  title: {
+metadataBase: new URL("https://www.gigisrental.com"),  title: {
     default: "Gigi's Rental | Dress Rentals in the Philippines",
     template: "%s | Gigi's Rental",
   },
@@ -54,7 +53,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_PH",
-    url: "https://gigisrental.com",
+  url: "https://www.gigisrental.com",   // was https://gigisrental.com
     title: "Gigi's Rental | Dress Rentals in the Philippines",
     description: "Beautiful dresses for rent for weddings, debuts, proms, and special occasions.",
     siteName: "Gigi's Rental",
@@ -94,8 +93,8 @@ const jsonLd = {
   "@type": "ClothingStore",
   name: "Gigi's Rental",
   alternateName: "Gigis Rental",
-  url: "https://gigisrental.com",
-  image: "https://gigisrental.com/og-image.jpg",
+  url: "https://www.gigisrental.com",              // was https://gigisrental.com
+    image: "https://gigisrental.com/og-image.jpg",
   description:
     "Gigi's Rental offers dress rentals for special occasions — browse our catalog and book your gown today.",
   address: {

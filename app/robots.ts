@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: "https://gigisrental.com/sitemap.xml",
+    sitemap: "https://www.gigisrental.com/sitemap.xml",
   };
 }
