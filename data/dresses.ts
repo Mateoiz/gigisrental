@@ -58,10 +58,10 @@ export const DRESSES: DressPreview[] = [
     image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Brielle1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Brielle2.jpg',
     gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Brielle1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Brielle2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Brielle3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Brielle4.jpg']
   },
-  { 
-    name: 'Adela', slug: 'adela', 
-    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg',
-    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela4.jpg']
+{ 
+    name: 'Maecy', slug: 'maecy', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Maecy1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Maecy2.jpg',
+    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Maecy1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Maecy2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Maecy3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Maecy4.jpg']
   },
   { 
     name: 'Alexa', slug: 'alexa', 
@@ -167,5 +167,25 @@ export const DRESSES: DressPreview[] = [
     name: 'Eliana', slug: 'eliana', 
     image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eliana1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eliana2.jpg',
     gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eliana1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eliana2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eliana3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eliana4.jpg']
+  },
+  { 
+    name: 'Selene', slug: 'selene', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Selene1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Selene2.jpg',
+    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Selene1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Selene2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Selene3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Selene4.jpg']
+  },
+  { 
+    name: 'Ophelia', slug: 'ophelia', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Ophelia1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Ophelia2.jpg',
+    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Ophelia1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Ophelia2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Ophelia3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Ophelia4.jpg']
+  },
+  { 
+    name: 'Eveline', slug: 'eveline', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline2.jpg',
+    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline4.jpg']
+  },
+{ 
+    name: 'Adela', slug: 'adela', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg',
+    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela4.jpg']
   },
 ]

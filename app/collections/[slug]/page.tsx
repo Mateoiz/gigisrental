@@ -88,11 +88,11 @@ document.body.style.overflow = 'unset'
   useEffect(() => {
     if (!slug) return
     const fetchDress = async () => {
-      const { data, error } = await supabase
-        .from('dresses')
-        .select('*')
-        .eq('slug', slug)
-        .single()
+const { data, error } = await supabase
+  .from('dresses')
+  .select('*')
+  .eq('slug', slug)
+  .single()
 
       if (error || !data) {
         setNotFound(true)
@@ -702,7 +702,12 @@ const DRESS_STYLES = `
   color: var(--rose-deep);
 }
 .dress-detail-name { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 500; }
-.dress-detail-desc { color: var(--mocha-soft); line-height: 1.75; font-size: 1rem; }
+.dress-detail-desc { 
+  color: var(--mocha-soft); 
+  line-height: 1.75; 
+  font-size: 1rem; 
+  white-space: pre-wrap; /* This forces the \n to render as actual line breaks! */
+}
 .dress-detail-unavailable { color: var(--rose-deep); font-style: italic; }
 
 .dress-detail-cta { display: flex; flex-direction: row; align-items: center; gap: 24px; margin-top: 12px; }
