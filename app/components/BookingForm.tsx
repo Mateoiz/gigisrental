@@ -25,8 +25,7 @@ const TIME_SLOTS = [
 
 const RENTAL_DURATIONS = [1, 2, 3, 4, 5]
 
-const STEPS = ['Style', 'Date', 'Time', 'Duration', 'Details', 'Confirm'] as const
-
+const STEPS = ['Style', 'Date', 'Time', 'Details', 'Confirm'] as const
 function generateDates(days = 21) {
   const out: { iso: string; weekday: string; day: string; month: string }[] = []
   const today = new Date()
@@ -56,12 +55,12 @@ const [submitError, setSubmitError] = useState<string | null>(null)
   const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null)
   const [dressLoading, setDressLoading] = useState(true)
 
-  const [booking, setBooking] = useState<BookingState>({
+const [booking, setBooking] = useState<BookingState>({
     dressId: null,
     dressName: null,
     date: null,
     time: null,
-    rentalDays: null,
+    rentalDays: 3, // Automatically locked to 3 days
     name: '',
     email: '',
     phone: '',
@@ -97,14 +96,12 @@ const [submitError, setSubmitError] = useState<string | null>(null)
   }, [dressSlug])
 
   const dates = generateDates()
-
 const canProceed = () => {
     switch (step) {
       case 0: return !!booking.dressId
       case 1: return !!booking.date
       case 2: return !!booking.time
-      case 3: return !!booking.rentalDays
-      case 4: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== ''
+      case 3: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== ''
       default: return true
     }
   }
@@ -686,20 +683,43 @@ const canProceed = () => {
 {step === 3 && (
               <>
                 <div className="bk-card-header">
-                  <h2>How many days?</h2>
-                  <p>Select your rental duration.</p>
+                  <h2>Your details</h2>
+                  <p>So we can confirm your appointment.</p>
                 </div>
-                <div className="bk-time-grid">
-                  {RENTAL_DURATIONS.map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      className={`bk-time-cell ${booking.rentalDays === d ? 'selected' : ''}`}
-                      onClick={() => update('rentalDays', d)}
-                    >
-                      {d} {d === 1 ? 'day' : 'days'}
-                    </button>
-                  ))}
+                <div className="bk-field">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={booking.name}
+                    onChange={(e) => update('name', e.target.value)}
+                    placeholder="Juana Dela Cruz"
+                  />
+                </div>
+                <div className="bk-field">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={booking.email}
+                    onChange={(e) => update('email', e.target.value)}
+                    placeholder="you@example.com"
+                  />
+                </div>
+                <div className="bk-field">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    value={booking.phone}
+                    onChange={(e) => update('phone', e.target.value)}
+                    placeholder="09XX XXX XXXX"
+                  />
+                </div>
+                <div className="bk-field">
+                  <label>Notes (optional)</label>
+                  <textarea
+                    value={booking.notes}
+                    onChange={(e) => update('notes', e.target.value)}
+                    placeholder="Event date, size range, color preferences..."
+                  />
                 </div>
               </>
             )}
