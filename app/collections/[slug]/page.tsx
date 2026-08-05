@@ -474,53 +474,103 @@ const DRESS_STYLES = `
 }
 
 @media (max-width: 760px) {
-  .dress-thumbnails { display: none; }
-  .mobile-pagination { display: flex; }
+  /* Remove global wrapper padding to allow true full-bleed for images */
+  .wrap { padding: 0; } 
+  .dress-status { padding: 60px 24px; }
   
-  /* App-like Swipeable Gallery */
+  .dress-detail { 
+    grid-template-columns: 1fr; 
+    gap: 20px;
+  }
+  
+  /* 1. Full-Bleed Editorial Images */
+  .dress-visuals { 
+    width: 100%; 
+    position: relative; /* Critical: anchors the overlay pagination */
+    flex-direction: column; 
+    min-width: 0; 
+  }
+  .dress-thumbnails { display: none; }
+  
   .dress-gallery.scroll-display {
+    width: 100%;
     flex-direction: row;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    margin: 0 -20px; /* Bleed to edges */
-    padding: 0 20px;
-    scrollbar-width: none; /* Firefox */
+    margin: 0; 
+    padding: 0;
+    scrollbar-width: none; 
   }
   .dress-gallery.scroll-display::-webkit-scrollbar {
-    display: none; /* Chrome/Safari: Hide scrollbar completely */
+    display: none; 
   }
   .dress-gallery-item {
-    flex: 0 0 88%; /* Peek of next image */
+    flex: 0 0 100vw; /* One single, highly focused image at a time */
     scroll-snap-align: center;
-    border-radius: 8px; /* Slightly softer corners on mobile */
+    border-radius: 0; /* Sharp, high-fashion edges */
   }
   
-  /* Sticky Action Bar for Mobile */
-  .dress-detail-info {
-    padding-bottom: 120px; /* Prevent text from hiding under the fixed bar */
+  /* 2. Floating Image Overlay Pagination */
+  .mobile-pagination { 
+    display: flex; 
+    position: absolute;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    padding: 0;
+    pointer-events: none; /* Let swipes pass through */
   }
+  .mobile-dot {
+    background: rgba(255, 255, 255, 0.45); /* Elegant translucent white */
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* Ensures visibility over light dresses */
+  }
+  .mobile-dot.is-active {
+    background: #ffffff;
+    transform: scale(1.35);
+  }
+
+  /* 3. Streamlined Text & Sticky CTA Hierarchy */
+  .dress-detail-info {
+    padding: 0 24px 120px 24px; /* Add the padding safely back to the text area */
+  }
+  
   .dress-detail-cta {
     position: fixed;
     bottom: 0;
     left: 0;
-    right: 0;
+    width: 100vw;
     margin: 0;
-    padding: 16px 20px 24px;
-    background: rgba(255, 253, 249, 0.85);
+    padding: 16px 24px calc(12px + env(safe-area-inset-bottom));
+    background: rgba(255, 253, 249, 0.92);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-top: 1px solid rgba(169, 100, 124, 0.15);
-    z-index: 100;
+    z-index: 99999; 
     display: flex;
     flex-direction: row;
-    justify-content: stretch;
+    gap: 12px;
   }
-  .dress-detail-cta .btn {
+  
+  /* Make the primary button dominate, secondary becomes a sleek outline */
+  .dress-detail-cta .btn-primary {
+    flex: 2;
+    justify-content: center;
+    padding: 16px;
+  }
+  .dress-detail-cta .btn-ghost {
     flex: 1;
     justify-content: center;
-    padding: 16px 20px;
+    padding: 16px 12px;
+    font-size: 0.75rem;
+    border: 1px solid rgba(169, 100, 124, 0.3);
+    background: transparent;
   }
-  .lightbox-content { padding: 16px; }
+  
+  .lightbox-content { padding: 0; }
+  .lightbox-image { border-radius: 0; }
 }
 
 /* --- Sticky Detail Info --- */

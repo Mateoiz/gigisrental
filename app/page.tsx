@@ -309,74 +309,121 @@ function GuidelinesFolder({
   }, [isOpen, activeTab])
 
   return (
-    <div className="folder">
-      <div className="folder-tabs" role="tablist" aria-label="Studio rules and guidelines">
-        {TABS.map((tab, index) => (
-          <button
-            key={tab.key}
-            ref={(el) => { tabRefs.current[tab.key] = el }}
-            type="button"
-            role="tab"
-            id={`tab-${tab.key}`}
-            aria-selected={activeTab === tab.key}
-            aria-controls={`panel-${tab.key}`}
-            tabIndex={activeTab === tab.key ? 0 : -1}
-            onClick={() => { onSelectTab(tab.key); onOpen() }}
-            onKeyDown={(e) => handleTabKeyDown(e, index)}
-            className={`folder-tab ${activeTab === tab.key ? 'active' : ''}`}
-            style={{
-              '--tab-accent': `var(--accent-${tab.key})`,
-              zIndex: activeTab === tab.key ? 10 : TABS.length - index,
-            } as React.CSSProperties}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+    <>
+      {/* --- DESKTOP FOLDER VIEW --- */}
+      <div className="folder desktop-folder">
+        <div className="folder-tabs" role="tablist" aria-label="Studio rules and guidelines">
+          {TABS.map((tab, index) => (
+            <button
+              key={tab.key}
+              ref={(el) => { tabRefs.current[tab.key] = el }}
+              type="button"
+              role="tab"
+              id={`tab-${tab.key}`}
+              aria-selected={activeTab === tab.key}
+              aria-controls={`panel-${tab.key}`}
+              tabIndex={activeTab === tab.key ? 0 : -1}
+              onClick={() => { onSelectTab(tab.key); onOpen() }}
+              onKeyDown={(e) => handleTabKeyDown(e, index)}
+              className={`folder-tab ${activeTab === tab.key ? 'active' : ''}`}
+              style={{
+                '--tab-accent': `var(--accent-${tab.key})`,
+                zIndex: activeTab === tab.key ? 10 : TABS.length - index,
+              } as React.CSSProperties}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      <div className={`folder-stack ${isOpen ? 'is-open' : 'is-closed'}`}>
-{!isOpen && (
-          <button
-            type="button"
-            className="folder-closed"
-            onClick={onOpen}
-            style={{ '--tab-accent': `var(--accent-${activeTab})` } as React.CSSProperties}
-          >
-            <CoquetteBow width={26} height={17} style={{ color: 'var(--tab-accent)' }} />
-            <span className="folder-closed-text">
-              <strong>{currentData.title}</strong>
-              <em>Tap to view {currentData.subtitle.toLowerCase()}</em>
-            </span>
-            <svg className="folder-closed-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
-          </button>
-        )}
-
-        <div className="folder-body" style={{ '--tab-accent': `var(--accent-${activeTab})` } as React.CSSProperties}>
-          <div className="folder-watermark" aria-hidden="true"><span>GR</span></div>
-
-          {isOpen && (
-            <button type="button" className="folder-close" onClick={onClose} aria-label="Close guidelines">
-              Close
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M6 6l12 12M18 6L6 18" />
+        <div className={`folder-stack ${isOpen ? 'is-open' : 'is-closed'}`}>
+          {!isOpen && (
+            <button
+              type="button"
+              className="folder-closed"
+              onClick={onOpen}
+              style={{ '--tab-accent': `var(--accent-${activeTab})` } as React.CSSProperties}
+            >
+              <CoquetteBow width={26} height={17} style={{ color: 'var(--tab-accent)' }} />
+              <span className="folder-closed-text">
+                <strong>{currentData.title}</strong>
+                <em>Tap to view {currentData.subtitle.toLowerCase()}</em>
+              </span>
+              <svg className="folder-closed-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M6 9l6 6 6-6" />
               </svg>
             </button>
           )}
 
-          <div
-            ref={panelRef}
-            role="tabpanel"
-            id={`panel-${activeTab}`}
-            aria-labelledby={`tab-${activeTab}`}
-            tabIndex={-1}
-          >
-            <TabPanel data={currentData} />
+          <div className="folder-body" style={{ '--tab-accent': `var(--accent-${activeTab})` } as React.CSSProperties}>
+            <div className="folder-watermark" aria-hidden="true"><span>GR</span></div>
+
+            {isOpen && (
+              <button type="button" className="folder-close" onClick={onClose} aria-label="Close guidelines">
+                Close
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            )}
+
+            <div
+              ref={panelRef}
+              role="tabpanel"
+              id={`panel-${activeTab}`}
+              aria-labelledby={`tab-${activeTab}`}
+              tabIndex={-1}
+            >
+              <TabPanel data={currentData} />
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+{/* --- MOBILE ACCORDION VIEW --- */}
+      <div className="mobile-accordion">
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab.key;
+          const isExpanded = isActive && isOpen; // <-- FIX: Now it checks if it should be open
+          const data = TAB_DATA[tab.key];
+          
+          return (
+            <div 
+              key={tab.key} 
+              className={`accordion-card ${isExpanded ? 'is-active' : ''}`}
+              style={{ '--tab-accent': `var(--accent-${tab.key})` } as React.CSSProperties}
+            >
+              <button 
+                type="button" 
+                className="accordion-header" 
+                onClick={() => {
+                  if (isActive && isOpen) {
+                    onClose();
+                  } else {
+                    onSelectTab(tab.key);
+                    onOpen();
+                  }
+                }}
+              >
+                <div className="accordion-header-left">
+                  <CoquetteBow width={20} height={13} style={{ color: 'var(--tab-accent)' }} />
+                  <span className="accordion-title">{tab.label}</span>
+                </div>
+                <svg className="accordion-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              
+              <div className="accordion-body-wrapper">
+                <div className="accordion-body">
+                   <TabPanel data={data} />
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </>
   )
 }
 
@@ -1000,36 +1047,117 @@ a { color: inherit; text-decoration: none; }
   .panel-card, .panel-list li { padding: 18px; }
 }
 
-/* --- App-like Mobile Layout for ToS Folder --- */
-@media (max-width: 760px) {
-  .folder-tabs {
-    padding: 0 16px 16px;
-    gap: 10px;
+/* --- Hide Mobile Accordion on Desktop --- */
+.mobile-accordion {
+  display: none;
+}
+
+/* --- App-like Mobile Accordion Layout --- */
+@media (max-width: 900px) {
+/* Enforce strict boundaries so the viewport doesn't zoom out */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+    position: relative; /* Helps lock down rogue elements */
   }
-  .folder-tab {
-    border-radius: 999px;
-    margin: 0;
-    padding: 10px 24px;
-    min-height: auto;
-    border: 1px solid rgba(169, 100, 124, 0.2);
+
+  /* Hide the 3D Desktop Folder entirely */
+  .desktop-folder {
+    display: none !important;
+  }
+
+  /* Show and style the Mobile Accordion */
+  .mobile-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 100%; /* FIX: Using 100% instead of 100vw kills the horizontal scroll */
+  }
+
+  .accordion-card {
     background: #fff;
+    border: 1px solid rgba(169, 100, 124, 0.2);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xs);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
   }
-  .folder-tab::before { 
-    display: none; /* Hide the 3D folder tab effect */
+  
+  .accordion-card.is-active {
+    border-color: var(--tab-accent);
+    box-shadow: 0 8px 24px -8px rgba(169, 100, 124, 0.25);
   }
-  .folder-tab.active {
-    background: var(--tab-accent, var(--rose-deep));
-    color: #fff;
-    border-color: transparent;
-    padding: 10px 24px;
-    margin-bottom: 0;
-    box-shadow: 0 4px 12px -4px var(--tab-accent, var(--rose-deep));
+
+  .accordion-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
   }
-  .folder-stack::before, .folder-stack::after { 
-    display: none; /* Hide 3D stack effect */
+
+  .accordion-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  .folder-closed { border-radius: 20px; }
-  .folder-body { border-radius: 20px; padding: 24px 20px; }
+
+  .accordion-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--mocha);
+    white-space: normal;
+  }
+
+  .accordion-icon {
+    color: var(--mocha-soft);
+    transition: transform 0.4s var(--ease-pop);
+    flex-shrink: 0; /* Prevents the chevron from squishing */
+  }
+
+  .accordion-card.is-active .accordion-icon {
+    transform: rotate(180deg);
+    color: var(--tab-accent);
+  }
+
+  .accordion-body-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s var(--ease-pop);
+    min-width: 0; /* CRITICAL: Prevents the grid from blowing out the screen width */
+  }
+
+  .accordion-card.is-active .accordion-body-wrapper {
+    grid-template-rows: 1fr;
+  }
+
+  .accordion-body {
+    overflow: hidden;
+    padding: 0 20px;
+    min-height: 0; /* CRITICAL: Required for grid animation to work properly */
+    min-width: 0; 
+  }
+  
+  .accordion-card.is-active .accordion-body {
+    padding: 0 20px 24px;
+  }
+
+  /* Prevent inner content from pushing the layout */
+  .panel-header h3 {
+    font-size: clamp(2.2rem, 8vw, 3rem);
+    word-break: break-word;
+  }
+  
+  .panel-list li, .panel-card {
+    padding: 16px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
