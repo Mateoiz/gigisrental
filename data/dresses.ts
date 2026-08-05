@@ -74,6 +74,11 @@ export const DRESSES: DressPreview[] = [
     gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Liam1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Liam2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Liam3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Liam4.jpg']
   },
   { 
+    name: 'Solenne', slug: 'solenne', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Solenne1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Solenne2.jpg',
+    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Solenne1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Solenne2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Solenne3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Solenne4.jpg']
+  },
+  { 
     name: 'Noelle', slug: 'noelle', 
     image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Noelle1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Noelle2.jpg',
     gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Noelle1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Noelle2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Noelle3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Noelle4.jpg']
