@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -30,6 +30,9 @@ const [loading, setLoading] = useState(true)
   const [allImages, setAllImages] = useState<string[]>([])
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [dragY, setDragY] = useState(0)
+  const [imgScale, setImgScale] = useState(1)
+  const touchStartY = useRef(0)
 
   // Prevent background scrolling and allow Escape key to close lightbox
 
@@ -49,6 +52,12 @@ const [loading, setLoading] = useState(true)
     } else {
 document.body.style.overflow = 'unset'
     }
+  }, [zoomedImage])
+
+  // Reset zoom/drag state whenever a new image is opened in the lightbox
+  useEffect(() => {
+    setImgScale(1)
+    setDragY(0)
   }, [zoomedImage])
 
   // Scroll-Spy: Track which image is currently in view
@@ -105,6 +114,23 @@ document.body.style.overflow = 'unset'
     }
     fetchDress()
   }, [slug])
+
+  // Touch handlers for swipe-down-to-dismiss on the lightbox
+  const handleLightboxTouchStart = (e: React.TouchEvent) => {
+    if (imgScale > 1) return // don't drag-to-dismiss while zoomed in
+    touchStartY.current = e.touches[0].clientY
+  }
+  const handleLightboxTouchMove = (e: React.TouchEvent) => {
+    if (imgScale > 1) return
+    const delta = e.touches[0].clientY - touchStartY.current
+    if (delta > 0) setDragY(delta)
+  }
+  const handleLightboxTouchEnd = () => {
+    if (dragY > 120) {
+      setZoomedImage(null)
+    }
+    setDragY(0)
+  }
 
 return (
     <>
@@ -207,6 +233,7 @@ return (
                         fill
                         sizes="(max-width: 760px) 88vw, 55vw"
                         priority={index === 0}
+                        loading={index === 0 ? undefined : 'lazy'}
                         className="dress-gallery-img"
                       />
                     </button>
@@ -222,6 +249,29 @@ return (
                     />
                   ))}
                 </div>
+
+                {/* Mobile Tap-to-Jump Thumbnail Strip (replaces hidden desktop thumbnails on mobile) */}
+                {allImages.length > 1 && (
+                  <div className="mobile-thumb-strip">
+                    {allImages.map((img, index) => (
+                      <button
+                        key={`mthumb-${index}`}
+                        type="button"
+                        onClick={() => {
+                          document.getElementById(`gallery-img-${index}`)?.scrollIntoView({
+                            behavior: 'smooth',
+                            inline: 'center',
+                            block: 'nearest',
+                          })
+                        }}
+                        className={`mobile-thumb-item ${activeIndex === index ? 'is-active' : ''}`}
+                        aria-label={`Jump to image ${index + 1}`}
+                      >
+                        <Image src={img} alt="" fill sizes="48px" className="dress-thumbnail-img" />
+                      </button>
+                    ))}
+                  </div>
+                )}
 
               </div>
 
@@ -246,7 +296,7 @@ return (
                   >
                     Rent This Dress
                   </Link>
-<Link href="/collections" className="btn btn-ghost">
+<Link href="/collections" className="btn-text-link">
                     Back to Collection
                   </Link>
                 </div>
@@ -256,19 +306,34 @@ return (
 </div>
       </section>
 
-      {/* Full-Screen Zoom Lightbox */}
+      {/* Full-Screen Zoom Lightbox — supports pinch/double-tap zoom and swipe-down-to-dismiss on touch */}
       {zoomedImage && (
-        <div className="lightbox-overlay" onClick={() => setZoomedImage(null)}>
+        <div
+          className="lightbox-overlay"
+          onClick={() => setZoomedImage(null)}
+          onTouchStart={handleLightboxTouchStart}
+          onTouchMove={handleLightboxTouchMove}
+          onTouchEnd={handleLightboxTouchEnd}
+          style={{
+            transform: `translateY(${dragY}px)`,
+            opacity: 1 - Math.min(Math.abs(dragY) / 400, 0.6),
+          }}
+        >
           <button className="lightbox-close" onClick={() => setZoomedImage(null)} aria-label="Close zoom">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
-          <div className="lightbox-content">
+          <div
+            className="lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+            onDoubleClick={() => setImgScale((s) => (s > 1 ? 1 : 2.5))}
+          >
             <Image
               src={zoomedImage}
               alt="Zoomed dress detail"
               fill
               sizes="100vw"
               className="lightbox-image"
+              style={{ transform: `scale(${imgScale})`, transition: 'transform 0.25s ease' }}
             />
           </div>
         </div>
@@ -347,6 +412,26 @@ const DRESS_STYLES = `
   border-color: var(--rose-deep);
 }
 
+/* --- Mobile Tap-to-Jump Thumbnail Strip --- */
+.mobile-thumb-strip {
+  display: none; /* enabled inside the mobile media query below */
+}
+.mobile-thumb-item {
+  position: relative;
+  flex: 0 0 48px;
+  aspect-ratio: 3 / 4;
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0.5;
+  border: 1px solid transparent;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+.mobile-thumb-item.is-active {
+  opacity: 1;
+  border-color: var(--rose-deep);
+}
+
 /* --- Skeleton Loading States --- */
 .skeleton-box {
   background: linear-gradient(90deg, #FDF2F5 25%, #FFFDF9 50%, #FDF2F5 75%);
@@ -391,7 +476,7 @@ const DRESS_STYLES = `
   transform-origin: var(--zoom-x) var(--zoom-y);
 }
 
-/* The hover scanning zoom (Desktop only) */
+/* The hover scanning zoom (Desktop only — touch devices use double-tap/pinch in the lightbox instead) */
 @media (hover: hover) {
   .dress-gallery-item:hover .dress-gallery-img {
     transform: scale(2.5);
@@ -415,6 +500,7 @@ const DRESS_STYLES = `
   justify-content: center;
   cursor: zoom-out;
   animation: fadeIn 0.3s ease forwards;
+  touch-action: none; /* enables custom swipe-to-dismiss handling on touch */
 }
 .lightbox-close {
   position: absolute;
@@ -437,6 +523,7 @@ const DRESS_STYLES = `
   width: 100%;
   height: 100%;
   padding: 40px;
+  overflow: hidden;
 }
 .lightbox-image {
   object-fit: contain;
@@ -532,6 +619,18 @@ const DRESS_STYLES = `
     transform: scale(1.35);
   }
 
+  /* 2b. Tap-to-Jump Thumbnail Strip (replaces the hidden desktop rail) */
+  .mobile-thumb-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 24px 0;
+    scrollbar-width: none;
+  }
+  .mobile-thumb-strip::-webkit-scrollbar {
+    display: none;
+  }
+
   /* 3. Streamlined Text & Sticky CTA Hierarchy */
   .dress-detail-info {
     padding: 0 24px 120px 24px; /* Add the padding safely back to the text area */
@@ -543,30 +642,29 @@ const DRESS_STYLES = `
     left: 0;
     width: 100vw;
     margin: 0;
-    padding: 16px 24px calc(12px + env(safe-area-inset-bottom));
-    background: rgba(255, 253, 249, 0.92);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(169, 100, 124, 0.15);
-    z-index: 99999; 
+    padding: 12px 20px calc(10px + env(safe-area-inset-bottom));
+    background: var(--porcelain);
+    border-top: 1px solid rgba(61, 44, 46, 0.08);
+    z-index: 99999;
     display: flex;
-    flex-direction: row;
-    gap: 12px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
-  
-  /* Make the primary button dominate, secondary becomes a sleek outline */
+
+  /* Uniqlo/Zara-style: one dominant, full-width, sharp-edged action button */
   .dress-detail-cta .btn-primary {
-    flex: 2;
-    justify-content: center;
-    padding: 16px;
+    width: 100%;
+    border-radius: 4px;
+    padding: 15px;
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
   }
-  .dress-detail-cta .btn-ghost {
-    flex: 1;
-    justify-content: center;
-    padding: 16px 12px;
-    font-size: 0.75rem;
-    border: 1px solid rgba(169, 100, 124, 0.3);
-    background: transparent;
+
+  /* Secondary action demoted to a plain underlined text link, not a competing button */
+  .dress-detail-cta .btn-text-link {
+    padding: 4px;
+    font-size: 0.7rem;
   }
   
   .lightbox-content { padding: 0; }
@@ -595,10 +693,11 @@ const DRESS_STYLES = `
 .dress-detail-desc { color: var(--mocha-soft); line-height: 1.75; font-size: 1rem; }
 .dress-detail-unavailable { color: var(--rose-deep); font-style: italic; }
 
-.dress-detail-cta { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+.dress-detail-cta { display: flex; flex-direction: row; align-items: center; gap: 24px; margin-top: 12px; }
+.dress-detail-cta .btn-primary { border-radius: 4px; }
 .btn {
   font-family: 'Jost', sans-serif;
-  display: inline-flex; align-items: center; gap: 10px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   padding: 14px 32px; border-radius: 999px; border: none;
   font-size: .8rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
   cursor: pointer; transition: all .25s ease;
@@ -606,6 +705,13 @@ const DRESS_STYLES = `
 .btn-primary { background: var(--mocha); color: #fff; }
 .btn-primary:hover { background: var(--rose-deep); }
 .btn-disabled { opacity: .4; pointer-events: none; }
-.btn-ghost { border: 1px dashed var(--rose-deep); color: var(--mocha); background: rgba(255,255,255,.75); }
-.btn-ghost:hover { background: var(--blush-ribbon); border-style: solid; color: var(--rose-deep); }
+.btn-text-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Jost', sans-serif;
+  font-size: .75rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--mocha-soft);
+  text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(61,44,46,.3);
+  transition: color .2s ease;
+}
+.btn-text-link:hover { color: var(--rose-deep); text-decoration-color: var(--rose-deep); }
 `
