@@ -12,9 +12,10 @@ interface BookingState {
   date: string | null
   time: string | null
   rentalDays: number | null
-  name: string
+name: string
   email: string
   phone: string
+  fbLink: string
   notes: string
 }
 
@@ -33,8 +34,12 @@ function generateDates(days = 21) {
     const d = new Date(today)
     d.setDate(today.getDate() + i)
     if (d.getDay() === 0) continue // skip Sundays (closed, adjust as needed)
-    out.push({
-      iso: d.toISOString().slice(0, 10),
+      out.push({
+        iso: [
+          d.getFullYear(),
+          String(d.getMonth() + 1).padStart(2, '0'),
+          String(d.getDate()).padStart(2, '0'),
+        ].join('-'),
       weekday: d.toLocaleDateString('en-US', { weekday: 'short' }),
       day: d.getDate().toString(),
       month: d.toLocaleDateString('en-US', { month: 'short' }),
@@ -52,8 +57,9 @@ export default function BookingForm() {
   const [submitting, setSubmitting] = useState(false)
 const [submitError, setSubmitError] = useState<string | null>(null)
   const [allDresses, setAllDresses] = useState<{ id: string; name: string; is_available: boolean; slug: string }[]>([])
-  const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null)
+const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null)
   const [dressLoading, setDressLoading] = useState(true)
+  const [bookedDatesByDress, setBookedDatesByDress] = useState<Record<string, string[]>>({})
 
 const [booking, setBooking] = useState<BookingState>({
     dressId: null,
@@ -64,6 +70,7 @@ const [booking, setBooking] = useState<BookingState>({
     name: '',
     email: '',
     phone: '',
+    fbLink: '',
     notes: '',
   })
 
@@ -79,14 +86,12 @@ const [booking, setBooking] = useState<BookingState>({
         setAllDresses(data)
         
         // Handle pre-selection if they arrived from a specific dress URL
-        if (dressSlug) {
+if (dressSlug) {
           const preselected = data.find(d => d.slug === dressSlug)
           if (preselected) {
             setPreselectedDress(preselected)
-            if (preselected.is_available) {
-              setBooking((b) => ({ ...b, dressId: preselected.id, dressName: preselected.name }))
-              setStep(1) 
-            }
+            setBooking((b) => ({ ...b, dressId: preselected.id, dressName: preselected.name }))
+            setStep(1)
           }
         }
       }
@@ -95,18 +100,58 @@ const [booking, setBooking] = useState<BookingState>({
     fetchDresses()
   }, [dressSlug])
 
+  // Fetch existing bookings so we can flag already-booked dates per dress
+useEffect(() => {
+    const fetchBookings = async () => {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('dress_id, booking_date')
+        .eq('status', 'approved')
+
+      console.log('[BookingForm] approved bookings raw:', data, 'error:', error)
+
+      if (data) {
+        const map: Record<string, string[]> = {}
+        data.forEach((row: { dress_id: string; booking_date: string }) => {
+          if (!row.booking_date) return
+          if (!map[row.dress_id]) map[row.dress_id] = []
+
+          // Safely parse YYYY-MM-DD locally to avoid timezone shifts
+          const [year, month, day] = row.booking_date.split('-').map(Number)
+
+          // Block a buffer window (e.g., 2 days before and 2 days after the booking)
+for (let offset = -3; offset <= 3; offset++) {            const targetDate = new Date(year, month - 1, day + offset)
+            const iso = [
+              targetDate.getFullYear(),
+              String(targetDate.getMonth() + 1).padStart(2, '0'),
+              String(targetDate.getDate()).padStart(2, '0'),
+            ].join('-')
+
+            if (!map[row.dress_id].includes(iso)) {
+              map[row.dress_id].push(iso)
+            }
+          }
+        })
+        console.log('[BookingForm] blocked dates map:', map)
+        console.log('[BookingForm] current dressId:', booking.dressId)
+        setBookedDatesByDress(map)
+      }
+    }
+    fetchBookings()
+  }, [])
+
   const dates = generateDates()
 const canProceed = () => {
     switch (step) {
       case 0: return !!booking.dressId
       case 1: return !!booking.date
       case 2: return !!booking.time
-      case 3: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== ''
+case 3: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== '' && booking.fbLink.trim() !== ''
       default: return true
     }
   }
 
-  const next = async () => {
+const next = async () => {
     if (!canProceed()) return
     if (step === STEPS.length - 1) {
       setSubmitting(true)
@@ -118,19 +163,16 @@ const canProceed = () => {
         booking_date: booking.date,
         booking_time: booking.time,
         rental_days: booking.rentalDays,
-        full_name: booking.name,
+full_name: booking.name,
         email: booking.email,
         phone: booking.phone,
+        fb_link: booking.fbLink,
         notes: booking.notes || null,
       })
 
-      // If the booking was successful, mark the chosen dress as unavailable
-      if (!error && booking.dressId) {
-        await supabase
-          .from('dresses')
-          .update({ is_available: false })
-          .eq('id', booking.dressId)
-      }
+      // We completely REMOVED the code that updates the 'dresses' table to is_available = false here!
+      // Now, multiple people can book the same dress, just on different days.
+
       setSubmitting(false)
 
       if (error) {
@@ -402,13 +444,28 @@ const canProceed = () => {
           margin-top: 3px;
         }
         .bk-date-cell:hover { border-color: var(--rose-deep); }
-        .bk-date-cell.selected {
+.bk-date-cell.selected {
           background: var(--rose-deep);
           border-color: var(--rose-deep);
         }
         .bk-date-cell.selected .wk,
         .bk-date-cell.selected .num,
         .bk-date-cell.selected .mo { color: #fff; }
+        .bk-date-cell.is-booked {
+          cursor: not-allowed;
+          opacity: 0.45;
+          background: var(--card);
+        }
+        .bk-date-cell.is-booked:hover { border-color: rgba(226, 166, 180, 0.5); }
+        .booked-tag {
+          display: block;
+          font-size: 0.55rem;
+          letter-spacing: 0.02em;
+          text-transform: uppercase;
+          color: var(--rose-deep);
+          margin-top: 4px;
+          font-weight: 600;
+        }
 
         /* --- TIME SLOTS --- */
         .bk-time-grid {
@@ -557,18 +614,7 @@ const canProceed = () => {
 <div className="bk-root">
         {dressLoading && <p style={{ textAlign: 'center', color: 'var(--mocha-soft)' }}>Loading...</p>}
 
-        {!dressLoading && preselectedDress && !preselectedDress.is_available ? (
-          <div className="bk-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <h2 style={{ fontSize: '2rem', fontStyle: 'italic', marginBottom: '10px' }}>Currently Unavailable</h2>
-            <p style={{ color: 'var(--mocha-soft)', maxWidth: '400px', margin: '0 auto 30px', lineHeight: '1.6' }}>
-              We're so sorry, but <strong>{preselectedDress.name}</strong> is currently being rented by another client and is unavailable for new bookings right now.
-            </p>
-            <a href="/collections" className="bk-btn bk-btn-ghost" style={{ textDecoration: 'none' }}>
-              Browse other dresses
-            </a>
-          </div>
-        ) : (
-          <>
+<>
             {!dressLoading && preselectedDress && !submitted && (
           <p style={{ textAlign: 'center', color: 'var(--rose-deep)', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: '1.1rem', marginBottom: '20px' }}>
             Booking a fitting for <strong>{preselectedDress.name}</strong>
@@ -612,8 +658,8 @@ const canProceed = () => {
                   <h2>Pick a piece</h2>
                   <p>Which dress are you booking a fitting for?</p>
                 </div>
-                <div className="bk-list">
-                  {allDresses.filter(d => d.is_available).map((d) => (
+<div className="bk-list">
+                  {allDresses.map((d) => (
                     <button
                       key={d.id}
                       type="button"
@@ -627,9 +673,9 @@ const canProceed = () => {
                       <span className="bk-check" />
                     </button>
                   ))}
-                  {allDresses.filter(d => d.is_available).length === 0 && (
+                  {allDresses.length === 0 && (
                     <p style={{ textAlign: 'center', color: 'var(--mocha-soft)' }}>
-                      No pieces are currently available for booking.
+                      No pieces are currently listed.
                     </p>
                   )}
                 </div>
@@ -642,19 +688,27 @@ const canProceed = () => {
                   <h2>Choose your date</h2>
                   <p>Select a day that works for you (closed Sundays).</p>
                 </div>
-                <div className="bk-date-grid">
-                  {dates.map((d) => (
-                    <button
-                      key={d.iso}
-                      type="button"
-                      className={`bk-date-cell ${booking.date === d.iso ? 'selected' : ''}`}
-                      onClick={() => update('date', d.iso)}
-                    >
-                      <span className="wk">{d.weekday}</span>
-                      <span className="num">{d.day}</span>
-                      <span className="mo">{d.month}</span>
-                    </button>
-                  ))}
+<div className="bk-date-grid">
+                  {dates.map((d) => {
+                    const isBooked = booking.dressId
+                      ? (bookedDatesByDress[booking.dressId] || []).includes(d.iso)
+                      : false
+                    return (
+                      <button
+                        key={d.iso}
+                        type="button"
+                        className={`bk-date-cell ${booking.date === d.iso ? 'selected' : ''} ${isBooked ? 'is-booked' : ''}`}
+                        onClick={() => { if (!isBooked) update('date', d.iso) }}
+                        disabled={isBooked}
+                        aria-disabled={isBooked}
+                      >
+                        <span className="wk">{d.weekday}</span>
+                        <span className="num">{d.day}</span>
+                        <span className="mo">{d.month}</span>
+                        {isBooked && <span className="booked-tag">Booked this day</span>}
+                      </button>
+                    )
+                  })}
                 </div>
               </>
             )}
@@ -704,7 +758,7 @@ const canProceed = () => {
                     placeholder="you@example.com"
                   />
                 </div>
-                <div className="bk-field">
+<div className="bk-field">
                   <label>Phone Number</label>
                   <input
                     type="tel"
@@ -714,47 +768,12 @@ const canProceed = () => {
                   />
                 </div>
                 <div className="bk-field">
-                  <label>Notes (optional)</label>
-                  <textarea
-                    value={booking.notes}
-                    onChange={(e) => update('notes', e.target.value)}
-                    placeholder="Event date, size range, color preferences..."
-                  />
-                </div>
-              </>
-            )}
-
-            {step === 4 && (
-              <>
-                <div className="bk-card-header">
-                  <h2>Your details</h2>
-                  <p>So we can confirm your appointment.</p>
-                </div>
-                <div className="bk-field">
-                  <label>Full Name</label>
+                  <label>Facebook Profile Link</label>
                   <input
-                    type="text"
-                    value={booking.name}
-                    onChange={(e) => update('name', e.target.value)}
-                    placeholder="Juana Dela Cruz"
-                  />
-                </div>
-                <div className="bk-field">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={booking.email}
-                    onChange={(e) => update('email', e.target.value)}
-                    placeholder="you@example.com"
-                  />
-                </div>
-                <div className="bk-field">
-                  <label>Phone Number</label>
-                  <input
-                    type="tel"
-                    value={booking.phone}
-                    onChange={(e) => update('phone', e.target.value)}
-                    placeholder="09XX XXX XXXX"
+                    type="url"
+                    value={booking.fbLink}
+                    onChange={(e) => update('fbLink', e.target.value)}
+                    placeholder="facebook.com/yourname"
                   />
                 </div>
                 <div className="bk-field">
@@ -795,9 +814,13 @@ const canProceed = () => {
                     <span className="k">Name</span>
                     <span className="v">{booking.name}</span>
                   </div>
-                  <div className="bk-summary-row">
+<div className="bk-summary-row">
                     <span className="k">Contact</span>
                     <span className="v">{booking.email} · {booking.phone}</span>
+                  </div>
+                  <div className="bk-summary-row">
+                    <span className="k">Facebook</span>
+                    <span className="v">{booking.fbLink}</span>
                   </div>
                   {booking.notes && (
                     <div className="bk-summary-row">
@@ -834,8 +857,7 @@ const canProceed = () => {
             )}
           </div>
         )}
-        </>
-      )}
+</>
       </div>
     </>
   )

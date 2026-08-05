@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Navbar from '@/app/components/Navbar'
 import Footer from '@/app/components/Footer'
 import CoquetteBow from '@/app/components/CoquetteBow'
@@ -11,10 +12,10 @@ type CategoryFilter = 'all' | 'long' | 'mini'
 export default function CollectionsGalleryPage() {
   const [filter, setFilter] = useState<CategoryFilter>('all')
 
-  const filteredDresses = DRESSES.filter((dress) => {
-    if (filter === 'all') return true
-    return dress.category?.toLowerCase() === filter
-  })
+  const filteredDresses = useMemo(() => {
+    if (filter === 'all') return DRESSES
+    return DRESSES.filter((dress) => dress.category?.toLowerCase() === filter)
+  }, [filter])
 
   return (
     <>
@@ -37,48 +38,47 @@ export default function CollectionsGalleryPage() {
 
           <div className="gallery-filters-sticky">
             <div className="gallery-filters" role="group" aria-label="Filter by dress length">
-              <button
-                type="button"
-                className={`gallery-filter-pill ${filter === 'all' ? 'active' : ''}`}
-                onClick={() => setFilter('all')}
-                aria-pressed={filter === 'all'}
-              >
-                All
-              </button>
-              <button
-                type="button"
-                className={`gallery-filter-pill ${filter === 'long' ? 'active' : ''}`}
-                onClick={() => setFilter('long')}
-                aria-pressed={filter === 'long'}
-              >
-                Long
-              </button>
-              <button
-                type="button"
-                className={`gallery-filter-pill ${filter === 'mini' ? 'active' : ''}`}
-                onClick={() => setFilter('mini')}
-                aria-pressed={filter === 'mini'}
-              >
-                Mini
-              </button>
+              {(['all', 'long', 'mini'] as const).map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  className={`gallery-filter-pill ${filter === f ? 'active' : ''}`}
+                  onClick={() => setFilter(f)}
+                  aria-pressed={filter === f}
+                >
+                  {f === 'all' ? 'All' : f[0].toUpperCase() + f.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
 
           {filteredDresses.length === 0 && (
-            <p className="gallery-empty">No {filter} dresses just yet — check back soon, or browse all pieces.</p>
+            <p className="gallery-empty">
+              No {filter} dresses just yet — check back soon, or browse all pieces.
+            </p>
           )}
 
           <div className="gallery-grid">
-            {filteredDresses.map((dress) => (
+            {filteredDresses.map((dress, i) => (
               <Link key={dress.slug} href={`/collections/${dress.slug}`} className="gallery-card">
                 <div className="gallery-card-photo-wrap">
-                  <div
+                  <Image
+                    src={dress.image}
+                    alt={dress.name}
+                    fill
+                    sizes="(max-width: 760px) 50vw, 25vw"
                     className="gallery-card-photo gallery-card-photo-base"
-                    style={{ backgroundImage: `url('${dress.image}')` }}
+                    style={{ objectFit: 'cover' }}
+                    priority={i < 4}
                   />
-                  <div
+                  <Image
+                    src={dress.hoverImage}
+                    alt=""
+                    aria-hidden="true"
+                    fill
+                    sizes="(max-width: 760px) 50vw, 25vw"
                     className="gallery-card-photo gallery-card-photo-hover"
-                    style={{ backgroundImage: `url('${dress.hoverImage}')` }}
+                    style={{ objectFit: 'cover' }}
                   />
                   <span className="gallery-card-view">
                     <CoquetteBow width={14} height={9} style={{ color: 'var(--rose-deep)' }} />
@@ -88,7 +88,7 @@ export default function CollectionsGalleryPage() {
                 <div className="gallery-card-info">
                   <span className="gallery-card-name">{dress.name}</span>
                   <span className="gallery-card-rule" aria-hidden="true" />
-                  <span className="gallery-card-category">{dress.category}</span>
+                  {dress.category && <span className="gallery-card-category">{dress.category}</span>}
                 </div>
               </Link>
             ))}

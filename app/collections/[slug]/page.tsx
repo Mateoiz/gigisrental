@@ -297,14 +297,11 @@ return (
                   <p className="dress-detail-desc">{dress.description}</p>
                 )}
 
-                {!dress.is_available && (
-                  <p className="dress-detail-unavailable">Currently unavailable for booking.</p>
-                )}
 
 <div className="dress-detail-cta">
                   <Link
-                    href={dress.is_available ? `/booking?dress=${dress.slug}` : '#'}
-                    className={`btn btn-primary ${!dress.is_available ? 'btn-disabled' : ''}`}
+                    href={`/booking?dress=${dress.slug}`}
+                    className="btn btn-primary"
                   >
                     Rent This Dress
                   </Link>
@@ -316,7 +313,30 @@ return (
             </div>
           )}
 </div>
+</section>
+
+      <section className="dress-detail-section" style={{ paddingTop: 0 }}>
+        <div className="wrap">
+          <div className="how-it-works-note">
+            <h3>How Dress Rental Works</h3>
+            <ul>
+              <li>
+                <strong>Rent</strong> Browse Gigi&rsquo;s Rental collection of beautiful dresses and gowns. Choose your favorite style and reserve it for your special occasion.
+              </li>
+              <li>
+                <strong>Style & Fit</strong> Schedule a fitting appointment to find the best size, style, and fit for you. Our team will help you select the perfect dress for your event.
+              </li>
+              <li>
+                <strong>Wear & Enjoy</strong> Wear your chosen dress, feel confident, and enjoy your special moment!
+              </li>
+              <li>
+                <strong>Return</strong> Return the dress to our showroom or arrange a delivery pickup. No need to worry about washing&mdash;we&rsquo;ll take care of the professional cleaning.
+              </li>
+            </ul>
+          </div>
+        </div>
       </section>
+
 
       {/* Full-Screen Zoom Lightbox — supports pinch/double-tap zoom and swipe-down-to-dismiss on touch */}
       {zoomedImage && (
@@ -731,4 +751,74 @@ const DRESS_STYLES = `
   transition: color .2s ease;
 }
 .btn-text-link:hover { color: var(--rose-deep); text-decoration-color: var(--rose-deep); }
+
+/* --- How It Works Side Note --- */
+.how-it-works-note {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(61, 44, 46, 0.08);
+  width: 100%;
+}
+.how-it-works-note h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--mocha);
+  margin-bottom: 16px;
+}
+.how-it-works-note ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.how-it-works-note li {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--mocha-soft);
+  position: relative;
+  padding-left: 20px;
+}
+.how-it-works-note li::before {
+  content: '✧';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--rose-deep);
+  font-size: 0.9rem;
+}
+.how-it-works-note strong {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mocha);
+  margin-bottom: 2px;
+}
+/* Mobile Adjustments for the Side Note */
+@media (max-width: 760px) {
+  .how-it-works-note {
+    padding: 0 24px 40px; /* Restores side padding stripped by .wrap on mobile, adds room above sticky CTA */
+    margin-top: 24px;
+  }
+  .how-it-works-note h3 {
+    font-size: 1.15rem;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .how-it-works-note ul {
+    gap: 14px;
+  }
+  .how-it-works-note li {
+    font-size: 0.8rem;
+    line-height: 1.55;
+    padding-left: 18px;
+  }
+  .how-it-works-note strong {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+}
 `

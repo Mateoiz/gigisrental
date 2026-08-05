@@ -183,9 +183,27 @@ export const DRESSES: DressPreview[] = [
     image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline2.jpg',
     gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Eveline4.jpg']
   },
+
 { 
     name: 'Adela', slug: 'adela', 
-    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg', hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg',
-    gallery: ['https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela3.jpg', 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela4.jpg']
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg?v=2', 
+    hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg?v=2',
+    gallery: [
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela1.jpg?v=2', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela2.jpg?v=2', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela3.jpg?v=2', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Adela4.jpg?v=2'
+    ]
   },
+  { 
+    name: 'Oceana', slug: 'oceana', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana1.jpg', 
+    hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana2.jpg',
+    gallery: [
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana1.jpg', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana2.jpg', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana3.jpg', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana4.jpg'
+    ]
+  }
 ]
