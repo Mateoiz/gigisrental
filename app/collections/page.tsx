@@ -145,7 +145,7 @@ const GALLERY_STYLES = `
   top: 0;
   z-index: 20;
   background: var(--porcelain);
-  padding-bottom: clamp(20px, 3vw, 32px);
+  padding: 12px 4px clamp(20px, 3vw, 32px);
   margin-bottom: 4px;
 }
 .gallery-filters {
@@ -176,8 +176,12 @@ const GALLERY_STYLES = `
   box-shadow: var(--shadow-xs);
 }
 .gallery-empty { text-align: center; color: var(--mocha-soft); font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; padding: 60px 20px; }
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: clamp(18px, 2.5vw, 26px); }
-.gallery-card {
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(18px, 2.5vw, 26px);
+  padding-top: 8px;
+}.gallery-card {
   display: flex; flex-direction: column;
   border-radius: 22px; overflow: hidden;
   background: var(--card);

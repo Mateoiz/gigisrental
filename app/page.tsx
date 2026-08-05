@@ -80,6 +80,48 @@ function TabPanel({ data }: { data: TabContentData }) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Global Tailor Stitch Overlay                                              */
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/*  Global Tailor Stitch Overlay                                              */
+/* -------------------------------------------------------------------------- */
+function GlobalStitches() {
+  return (
+    <div className="stitch-canvas" aria-hidden="true">
+      {/* Left Wall Stitches */}
+      <div className="stitch-side stitch-left">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="thread-left" width="100%" height="800" patternUnits="userSpaceOnUse">
+              {/* Outer Thread */}
+              <path d="M 80 0 C 230 250, -70 550, 80 800" className="stitch-path" />
+              {/* Inner Thread */}
+              <path d="M 230 0 C 80 250, 380 550, 230 800" className="stitch-path" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#thread-left)" />
+        </svg>
+      </div>
+      
+      {/* Right Wall Stitches */}
+      <div className="stitch-side stitch-right">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="thread-right" width="100%" height="800" patternUnits="userSpaceOnUse">
+              {/* Inner Thread */}
+              <path d="M 170 0 C 320 250, 20 550, 170 800" className="stitch-path" />
+              {/* Outer Thread */}
+              <path d="M 320 0 C 170 250, 470 550, 320 800" className="stitch-path" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#thread-right)" />
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Hero - Split into Splash Image & Scroll-Revealed Content                  */
 /* -------------------------------------------------------------------------- */
 
@@ -132,9 +174,9 @@ function Hero({ onExploreRules, onExploreEtiquette }: { onExploreRules: () => vo
         </button>
       </section>
 
-      <section className="hero-info-wrapper" id="discover">
+<section className="hero-info-wrapper" id="discover">
         <div 
-          ref={contentRef} 
+          ref={contentRef}
           className={`hero-content ${isVisible ? 'pop-up-visible' : 'pop-up-hidden'}`}
         >
           <span className="eyebrow-pill">
@@ -442,8 +484,10 @@ export default function RulesPage() {
   }
 
 return (
-    <>
+    <div className="page-wrapper">
       <style dangerouslySetInnerHTML={{ __html: PAGE_STYLES }} />
+
+      <GlobalStitches />
 
       <Hero
         onExploreRules={() => goToGuidelines('terms')}
@@ -478,8 +522,8 @@ return (
         </div>
       </section>
 
-      <Footer />
-    </>
+<Footer />
+    </div>
   )
 }
 
@@ -499,7 +543,7 @@ const PAGE_STYLES = `
 }
 
 :root {
-  --porcelain: #FFFDF9;
+  --porcelain: #FFFBF7; /* Slightly warmer to match the reference image background */
   --card: #FFFFFF;
   --rose: #D48B9D;
   --rose-deep: #A9647C;
@@ -519,9 +563,22 @@ const PAGE_STYLES = `
   --accent-terms: #8E4F63;
   --accent-reminder: #D391A6;
 
-  --radius-lg: 24px;
+--radius-lg: 24px;
   --ease-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
   --nav-h: 92px;
+
+/* --- Grid Pattern --- */
+  --grid-color: rgba(212, 139, 157, 0.35); /* Slightly darker rose for better visibility */
+  --grid-pattern: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+
+  /* --- Coquette Fabric Textures --- */
+  --tulle-pattern: radial-gradient(var(--tulle-dot) 1.5px, transparent 1.5px);
+  --gingham-pattern: 
+    repeating-linear-gradient(45deg, rgba(212, 139, 157, 0.03) 0px, rgba(212, 139, 157, 0.03) 1px, transparent 1px, transparent 16px), 
+    repeating-linear-gradient(-45deg, rgba(212, 139, 157, 0.03) 0px, rgba(212, 139, 157, 0.03) 1px, transparent 1px, transparent 16px);
+  --silk-gradient: linear-gradient(180deg, var(--porcelain) 0%, #FFF9FA 50%, #FFFDF9 100%);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -540,6 +597,7 @@ html { scroll-behavior: smooth; }
 ::-webkit-scrollbar-thumb:hover { background: var(--rose-deep); }
 
 body {
+  background-image: var(--silk-gradient);
   background-color: var(--porcelain);
   color: var(--mocha);
   font-family: 'Jost', sans-serif;
@@ -555,8 +613,10 @@ body::after {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  pointer-events: none; /* Ensures you can still click things underneath it */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  /* Warmer, softer grain matching the reference texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.045'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
 }
 h1, h2, h3 { font-family: 'Cormorant Garamond', serif; font-weight: 500; line-height: 1.08; color: var(--mocha); }
 a { color: inherit; text-decoration: none; }
@@ -586,6 +646,59 @@ a { color: inherit; text-decoration: none; }
 .btn-primary:hover { background: var(--rose-deep); box-shadow: 0 4px 10px rgba(61,44,46,.2), 0 20px 38px -8px rgba(169,100,124,.55); }
 .btn-ghost { border: 1px dashed var(--rose-deep); color: var(--mocha); background: rgba(255,255,255,.75); backdrop-filter: blur(6px); box-shadow: var(--shadow-xs); }
 .btn-ghost:hover { background: var(--blush-ribbon); border-style: solid; color: var(--rose-deep); box-shadow: var(--shadow-sm); }
+
+/* ---- global layout & tailor stitches ---- */
+.page-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.stitch-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10; /* Boosted z-index forces stitches over the hero text block's solid background */
+}
+
+.stitch-side {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 400px; /* Constrains threads to the screen edges */
+  max-width: 30vw; /* Keeps threads out of the main text area on smaller screens */
+  opacity: 0.8;
+}
+.stitch-left {
+  left: 0;
+}
+.stitch-right {
+  right: 0;
+}
+
+/* --- Mobile Optimization for Stitches --- */
+@media (max-width: 900px) {
+  .stitch-canvas {
+    z-index: 0; /* Drops the threads behind the content so text remains readable */
+  }
+  .stitch-side {
+    max-width: none; /* Removes the 30vw limit to prevent SVG clipping */
+    width: 100vw; /* Let the curves flow naturally across the device */
+    opacity: 0.25; /* Soften into a delicate sketchpad watermark behind the text */
+  }
+  .stitch-left svg {
+    /* Push the left threads slightly wider on mobile for a better intersection */
+    transform: translateX(-15%);
+  }
+}
+.stitch-path {
+  fill: none;
+  stroke: var(--rose-deep);
+  stroke-width: 2.5;
+  stroke-dasharray: 8 10; /* Matches the dashed tailor chalk/thread look */
+  opacity: 0.35;
+  stroke-linecap: round;
+}
 
 /* ---- hero: splash & info ---- */
 .hero-splash {
@@ -687,7 +800,9 @@ a { color: inherit; text-decoration: none; }
 }
 
 .hero-info-wrapper {
-  background: var(--porcelain);
+  background-color: var(--porcelain);
+  background-image: var(--tulle-pattern);
+  background-size: 24px 24px;
   padding: clamp(64px, 8vw, 100px) 20px;
   display: flex;
   justify-content: center;
@@ -695,14 +810,23 @@ a { color: inherit; text-decoration: none; }
   z-index: 5;
   box-shadow: 0 -20px 40px rgba(61,44,46,0.05); 
 }
-
-.hero-content { 
-  max-width: 720px; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
+.hero-content {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  gap: 22px; 
+  gap: 22px;
+  padding: clamp(40px, 6vw, 64px) 0;
+  position: relative;
+}
+.hero-content::before {
+  content: '';
+  position: absolute;
+  inset: -50px;
+  background: radial-gradient(ellipse at center, rgba(255, 253, 249, 0.95) 30%, transparent 70%);
+  z-index: -1;
+  pointer-events: none;
 }
 
 /* Pop-Up Animation Classes */
@@ -718,11 +842,15 @@ a { color: inherit; text-decoration: none; }
 
 .eyebrow-pill {
   display: inline-flex; align-items: center; gap: 10px;
-  padding: 8px 22px; border-radius: 999px;
-  border: 1px dashed var(--rose);
-  background: rgba(255,255,255,.9);
-  font-size: .72rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--rose-deep);
+  padding: 6px 16px;
+  background: #E6EDD3;
+  border-radius: 2px 12px 4px 8px; /* Organic, hand-placed sticker shape */
+  font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--mocha);
+  transform: rotate(-3deg) translateY(10px);
+  box-shadow: 2px 2px 0 rgba(61, 44, 46, 0.08);
+  position: relative;
+  z-index: 2;
 }
 
 .hero-lead {
@@ -732,8 +860,7 @@ a { color: inherit; text-decoration: none; }
   max-width: 560px;
 }
 .hero-cta-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
-.trust-row { display: flex; gap: clamp(16px, 3vw, 32px); justify-content: center; flex-wrap: wrap; font-size: .8rem; color: var(--mocha-soft); margin-top: 12px; }
-.trust-row span { display: inline-flex; align-items: center; gap: 6px; }
+.trust-row { display: flex; gap: clamp(16px, 3vw, 32px); justify-content: center; flex-wrap: wrap; font-size: .8rem; color: var(--mocha-soft); margin-top: 24px; padding-top: 24px; border-top: 1px dashed var(--rose); width: 100%; }.trust-row span { display: inline-flex; align-items: center; gap: 6px; }
 
 /* ---- wordmark ---- */
 .wordmark {
@@ -760,9 +887,29 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---- about section ---- */
-.about-section { padding: clamp(60px, 8vw, 110px) 0; background: linear-gradient(180deg, var(--porcelain) 0%, #FFF8F3 100%); }
-.about-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; max-width: 760px; }
-.about-heading { font-size: clamp(2.2rem, 4.5vw, 3.2rem); color: var(--mocha); }
+.about-wrap { 
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; 
+  max-width: 800px;
+  padding: clamp(40px, 6vw, 64px) 0;
+}
+.about-heading { 
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem); 
+  color: var(--mocha); 
+  position: relative;
+  display: inline-block;
+  z-index: 1;
+}
+.about-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: -10px;
+  right: -10px;
+  height: 14px;
+  background: rgba(212, 139, 157, 0.25); /* Subtle rose highlighter sweep */
+  z-index: -1;
+  transform: rotate(-1deg);
+}
 .about-lead { font-size: clamp(1rem, 1.5vw, 1.1rem); color: var(--mocha-soft); line-height: 1.8; max-width: 620px; }
 .about-values { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: clamp(20px, 3vw, 32px); width: 100%; margin-top: clamp(24px, 3vw, 36px); }
 .about-value { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 20px; }
@@ -773,8 +920,13 @@ a { color: inherit; text-decoration: none; }
 /* ---- collection preview ---- */
 .collection-section { padding: clamp(60px, 8vw, 110px) 0; background: #FFF8F3; }
 .collection-cta { display: flex; justify-content: center; margin-top: clamp(36px, 4vw, 52px); }
-.collection-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; margin-bottom: clamp(32px, 4vw, 48px); }
-.collection-lead { max-width: 520px; }
+.collection-header { 
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; 
+  margin-bottom: clamp(40px, 5vw, 64px); 
+  max-width: 640px;
+  margin-left: auto; margin-right: auto;
+}
+  .collection-lead { max-width: 520px; }
 .collection-grid { 
   display: grid; 
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
@@ -787,8 +939,9 @@ a { color: inherit; text-decoration: none; }
   background: transparent;
   transition: transform .3s var(--ease-pop);
 }
-.collection-card:hover { transform: translateY(-6px) rotate(-.6deg); }
-.collection-card-photo-wrap {
+.collection-card:nth-child(odd) { transform: translateY(12px) rotate(-1.5deg); }
+.collection-card:nth-child(even) { transform: translateY(-8px) rotate(2deg); }
+.collection-card:hover { transform: translateY(-12px) scale(1.02); z-index: 10; }.collection-card-photo-wrap {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
@@ -884,7 +1037,7 @@ a { color: inherit; text-decoration: none; }
 /* ---- guidelines section / folder tabs ---- */
 
 /* ---- guidelines section / folder tabs ---- */
-.guidelines-section { padding: clamp(40px, 6vw, 80px) 0 clamp(80px, 10vw, 130px); position: relative; background: var(--porcelain); }
+.guidelines-section { padding: clamp(40px, 6vw, 80px) 0 clamp(80px, 10vw, 130px); position: relative; background-color: var(--porcelain); background-image: var(--silk-gradient); }
 
 .folder-tabs {
   display: flex; align-items: flex-end;

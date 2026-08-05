@@ -99,15 +99,26 @@ document.body.style.overflow = 'unset'
       } else {
         setDress(data)
         
-// Compile all unique images into a single array for the gallery
+// Compile all valid, unique images into a single array for the gallery
         const images: string[] = []
-        if (data.image_base) images.push(data.image_base)
-        if (data.image_hover) images.push(data.image_hover)
+        
+        if (data.image_base && data.image_base.trim() !== '') {
+          images.push(data.image_base.trim())
+        }
+        
+        if (data.image_hover && data.image_hover.trim() !== '' && !images.includes(data.image_hover.trim())) {
+          images.push(data.image_hover.trim())
+        }
+        
         if (data.gallery && Array.isArray(data.gallery)) {
           data.gallery.forEach((img: string) => {
-            if (!images.includes(img)) images.push(img)
+            const cleanImg = img ? img.trim() : ''
+            if (cleanImg !== '' && !images.includes(cleanImg)) {
+              images.push(cleanImg)
+            }
           })
         }
+        
         setAllImages(images)
       }
       setLoading(false)
@@ -191,12 +202,13 @@ return (
                         className={`dress-thumbnail-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Scroll to image ${index + 1}`}
                       >
-                        <Image
+<Image
                           src={img}
                           alt=""
                           fill
                           sizes="64px"
                           className="dress-thumbnail-img"
+                          onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
                       </button>
                     ))}
@@ -227,7 +239,7 @@ return (
                       aria-label="View zoomed image"
                       style={{ animationDelay: `${index * 0.15}s` }}
                     >
-                      <Image
+<Image
                         src={img}
                         alt=""
                         fill
@@ -235,6 +247,7 @@ return (
                         priority={index === 0}
                         loading={index === 0 ? undefined : 'lazy'}
                         className="dress-gallery-img"
+                        onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                       />
                     </button>
                   ))}
@@ -267,8 +280,7 @@ return (
                         className={`mobile-thumb-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Jump to image ${index + 1}`}
                       >
-                        <Image src={img} alt="" fill sizes="48px" className="dress-thumbnail-img" />
-                      </button>
+<Image src={img} alt="" fill sizes="48px" className="dress-thumbnail-img" onError={() => setAllImages((prev) => prev.filter((i) => i !== img))} />                      </button>
                     ))}
                   </div>
                 )}
