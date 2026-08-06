@@ -214,13 +214,21 @@ export default function AdminDashboard() {
       tone: 'danger',
       onConfirm: async () => {
         closeConfirm()
-        const { error: deleteError } = await supabase
+        const { error: deleteError, data: deletedRows } = await supabase
           .from('bookings')
           .delete()
           .eq('id', bookingId)
+          .select()
+
+        console.log('Delete result:', { deletedRows, deleteError })
 
         if (deleteError) {
           showToast('Failed to delete booking.', 'error')
+          return
+        }
+
+        if (!deletedRows || deletedRows.length === 0) {
+          showToast('Delete blocked — no rows removed (likely a permissions/RLS issue).', 'error')
           return
         }
 
