@@ -1,21 +1,52 @@
 'use client'
-import { useMemo, useState } from 'react'
+
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Navbar from '@/app/components/Navbar'
 import Footer from '@/app/components/Footer'
 import CoquetteBow from '@/app/components/CoquetteBow'
-import { DRESSES } from '@/data/dresses'
+import { supabase } from '@/lib/supabase'
 
 type CategoryFilter = 'all' | 'long' | 'mini'
 
+interface Dress {
+  slug: string
+  name: string
+  category: string | null
+  image_base: string | null
+  image_hover: string | null
+}
+
 export default function CollectionsGalleryPage() {
   const [filter, setFilter] = useState<CategoryFilter>('all')
+  const [dresses, setDresses] = useState<Dress[]>([])
+  const [loading, setLoading] = useState(true)
 
+  // Fetch from database on mount
+  useEffect(() => {
+    const fetchDresses = async () => {
+      const { data, error } = await supabase
+        .from('dresses')
+        .select('slug, name, category, image_base, image_hover')
+        // Only fetch available dresses if you want to hide unavailable ones:
+        // .eq('is_available', true) 
+        .order('name')
+
+      if (data && !error) {
+        setDresses(data)
+      }
+      setLoading(false)
+    }
+
+    fetchDresses()
+  }, [])
+
+  // Filter the live data
   const filteredDresses = useMemo(() => {
-    if (filter === 'all') return DRESSES
-    return DRESSES.filter((dress) => dress.category?.toLowerCase() === filter)
-  }, [filter])
+    if (filter === 'all') return dresses
+    return dresses.filter((dress) => dress.category?.toLowerCase() === filter)
+  }, [filter, dresses])
 
   return (
     <>
@@ -52,47 +83,55 @@ export default function CollectionsGalleryPage() {
             </div>
           </div>
 
-          {filteredDresses.length === 0 && (
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--mocha-soft)', fontStyle: 'italic', fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem' }}>
+              Curating the collection...
+            </div>
+          ) : filteredDresses.length === 0 ? (
             <p className="gallery-empty">
               No {filter} dresses just yet — check back soon, or browse all pieces.
             </p>
+          ) : (
+            <div className="gallery-grid">
+              {filteredDresses.map((dress, i) => (
+                <Link key={dress.slug} href={`/collections/${dress.slug}`} className="gallery-card">
+                  <div className="gallery-card-photo-wrap">
+                    {dress.image_base && (
+                      <Image
+                        src={dress.image_base}
+                        alt={dress.name}
+                        fill
+                        sizes="(max-width: 760px) 50vw, 25vw"
+                        className="gallery-card-photo gallery-card-photo-base"
+                        style={{ objectFit: 'cover' }}
+                        priority={i < 4}
+                      />
+                    )}
+                    {dress.image_hover && (
+                      <Image
+                        src={dress.image_hover}
+                        alt=""
+                        aria-hidden="true"
+                        fill
+                        sizes="(max-width: 760px) 50vw, 25vw"
+                        className="gallery-card-photo gallery-card-photo-hover"
+                        style={{ objectFit: 'cover' }}
+                      />
+                    )}
+                    <span className="gallery-card-view">
+                      <CoquetteBow width={14} height={9} style={{ color: 'var(--rose-deep)' }} />
+                      View the piece
+                    </span>
+                  </div>
+                  <div className="gallery-card-info">
+                    <span className="gallery-card-name">{dress.name}</span>
+                    <span className="gallery-card-rule" aria-hidden="true" />
+                    {dress.category && <span className="gallery-card-category">{dress.category}</span>}
+                  </div>
+                </Link>
+              ))}
+            </div>
           )}
-
-          <div className="gallery-grid">
-            {filteredDresses.map((dress, i) => (
-              <Link key={dress.slug} href={`/collections/${dress.slug}`} className="gallery-card">
-                <div className="gallery-card-photo-wrap">
-                  <Image
-                    src={dress.image}
-                    alt={dress.name}
-                    fill
-                    sizes="(max-width: 760px) 50vw, 25vw"
-                    className="gallery-card-photo gallery-card-photo-base"
-                    style={{ objectFit: 'cover' }}
-                    priority={i < 4}
-                  />
-                  <Image
-                    src={dress.hoverImage}
-                    alt=""
-                    aria-hidden="true"
-                    fill
-                    sizes="(max-width: 760px) 50vw, 25vw"
-                    className="gallery-card-photo gallery-card-photo-hover"
-                    style={{ objectFit: 'cover' }}
-                  />
-                  <span className="gallery-card-view">
-                    <CoquetteBow width={14} height={9} style={{ color: 'var(--rose-deep)' }} />
-                    View the piece
-                  </span>
-                </div>
-                <div className="gallery-card-info">
-                  <span className="gallery-card-name">{dress.name}</span>
-                  <span className="gallery-card-rule" aria-hidden="true" />
-                  {dress.category && <span className="gallery-card-category">{dress.category}</span>}
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
 
