@@ -28,16 +28,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-metadataBase: new URL("https://www.gigisrental.com"),  title: {
-    default: "Gigi's Rental | Dress Rentals in the Philippines",
-    template: "%s | Gigi's Rental",
+  metadataBase: new URL("https://www.gigisrental.com"),
+  title: {
+    default: "Gigi’s Rental",
+    template: "%s | Gigi’s Rental",
   },
   description:
-    "Gigi's Rental offers beautiful dresses for rent for weddings, debuts, proms, and special occasions in the Philippines. Browse our catalog and book today.",
-  applicationName: "Gigi's Rental",
+    "Gigi’s Rental offers beautiful dresses for rent for weddings, debuts, proms, and special occasions in the Philippines. Browse our catalog and book today.",
+  applicationName: "Gigi’s Rental",
   authors: [{ name: "Ice Matthew Ramirez" }],
   keywords: [
-    "Gigi's Rental",
+    "Gigi’s Rental",
     "Gigis Rental",
     "dress rental Philippines",
     "gown rental",
@@ -53,22 +54,22 @@ metadataBase: new URL("https://www.gigisrental.com"),  title: {
   openGraph: {
     type: "website",
     locale: "en_PH",
-  url: "https://www.gigisrental.com",   // was https://gigisrental.com
-    title: "Gigi's Rental | Dress Rentals in the Philippines",
+    url: "https://www.gigisrental.com",
+    title: "Gigi’s Rental",
     description: "Beautiful dresses for rent for weddings, debuts, proms, and special occasions.",
-    siteName: "Gigi's Rental",
+    siteName: "Gigi’s Rental",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Gigi's Rental Banner",
+        alt: "Gigi’s Rental Banner",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Gigi's Rental | Dress Rentals in the Philippines",
+    title: "Gigi’s Rental | Dress Rentals in the Philippines",
     description: "Beautiful dresses for rent for weddings, debuts, proms, and special occasions.",
     images: ["/og-image.jpg"],
   },
