@@ -92,12 +92,12 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ClothingStore",
-  name: "Gigi's Rental",
+  name: "Gigi’s Rental",
   alternateName: "Gigis Rental",
-  url: "https://www.gigisrental.com",              // was https://gigisrental.com
-    image: "https://gigisrental.com/og-image.jpg",
+  url: "https://www.gigisrental.com",
+  image: "https://gigisrental.com/og-image.jpg",
   description:
-    "Gigi's Rental offers dress rentals for special occasions — browse our catalog and book your gown today.",
+    "Gigi’s Rental offers dress rentals for special occasions — browse our catalog and book your gown today.",
   address: {
     "@type": "PostalAddress",
     addressCountry: "PH",
