@@ -449,7 +449,7 @@ export default function AboutPage() {
 
 <div className="story-frame">              <div className="story-frame-inner">
                 {/* Swap this image out for a real photo of your studio or favorite dress! */}
-                <img src="/logo/6.jpg" alt="Inside Gigi's Rentals Atelier" />
+                <img src="/about/GGRNTL.png" alt="Inside Gigi's Rentals Atelier" />
               </div>
               <div className="frame-badge">
                 <span style={{ color: 'var(--rose)' }}>♡</span> Private Studio Showroom
