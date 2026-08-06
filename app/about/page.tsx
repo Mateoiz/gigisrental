@@ -5,7 +5,6 @@ import Link from 'next/link'
 import Footer from '@/app/components/Footer'
 import page from '../page'
 
-
 interface CoquetteBowProps {
   className?: string
   width?: number
@@ -86,8 +85,8 @@ export default function AboutPage() {
           --shadow-sm: 0 2px 4px rgba(74, 51, 55, 0.07), 0 8px 20px -8px rgba(184, 107, 125, 0.22);
           --shadow-md: 0 4px 8px rgba(74, 51, 55, 0.08), 0 16px 36px -12px rgba(184, 107, 125, 0.28);
         }
-*, *::before, *::after { box-sizing: border-box; }
-.hero *, .guidelines-section *, .folder * { margin: 0; padding: 0; }
+        *, *::before, *::after { box-sizing: border-box; }
+        .hero *, .guidelines-section *, .folder * { margin: 0; padding: 0; }
 
         @keyframes coquette-wiggle {
           0%, 100% { transform: translateY(-3px) rotate(0deg) scale(1.02); }
@@ -269,7 +268,7 @@ export default function AboutPage() {
           height: 100%;
           object-fit: cover;
         }
-        .frame-badge {
+.frame-badge {
           position: absolute;
           bottom: -16px;
           left: 30px;
@@ -285,8 +284,28 @@ export default function AboutPage() {
           z-index: 5;
         }
 
+/* Overlapping Stamp Logo */
+        .stamp-logo {
+          position: absolute;
+          top: -30px;
+          right: -45px;
+          width: 140px;
+          height: auto;
+          z-index: 10;
+          transform: rotate(12deg);
+          pointer-events: none;
+          filter: drop-shadow(2px 6px 12px rgba(184, 107, 125, 0.15));
+        }
+        @media (max-width: 768px) {
+          .stamp-logo {
+            top: -20px;
+            width: 100px;
+            right: -20px;
+          }
+        }
+
         /* --- PILLARS SECTION --- */
-.pillars-section {
+        .pillars-section {
           padding: clamp(70px, 10vw, 120px) 0 clamp(40px, 6vw, 70px);
           background: linear-gradient(180deg, var(--porcelain) 0%, #FFF8F3 50%, var(--porcelain) 100%);
           border-top: 1px dashed var(--line);
@@ -342,11 +361,11 @@ export default function AboutPage() {
         }
 
         /* --- NOTE / PROMISE SECTION --- */
-.promise-section {
+        .promise-section {
           padding: clamp(50px, 7vw, 90px) 0;
           text-align: center;
         }
-.promise-box {
+        .promise-box {
           max-width: 840px;
           margin: 0 auto;
           background: #FFF7F8;
@@ -379,11 +398,13 @@ export default function AboutPage() {
           margin: 0 auto 32px;
           line-height: 1.9;
         }
-        .signature {
-          font-family: 'Parisienne', cursive;
-          font-size: clamp(2.4rem, 4vw, 3.2rem);
-          color: var(--rose-deep);
-          margin-bottom: 36px;
+        
+        /* THE NEW LOGO CREST */
+        .signature-crest {
+          width: 140px;
+          height: auto;
+          margin: 0 auto 36px;
+          display: block;
         }
         
         .gg-btn-primary {
@@ -417,7 +438,7 @@ export default function AboutPage() {
               <CoquetteBow width={20} height={14} style={{ color: 'var(--rose-deep)' }} />
               The Heart Behind The Atelier
             </span>
-<h1>Designed for Moments You&apos;ll Never Forget</h1>
+            <h1>Designed for Moments You&apos;ll Never Forget</h1>
             <p className="subtitle">
               Gigi&apos;s Rentals is a premium dress rental boutique offering carefully curated gowns
               that celebrate femininity, confidence, and timeless elegance.
@@ -430,7 +451,7 @@ export default function AboutPage() {
       <section className="story-section">
         <div className="full-wrap">
           <div className="story-grid">
-<div className="story-text">
+            <div className="story-text">
               <h2>Luxury Isn&apos;t About Owning More</h2>
               <p>
                 We believe luxury isn&apos;t about owning more — it&apos;s about wearing the perfect
@@ -447,7 +468,11 @@ export default function AboutPage() {
               </p>
             </div>
 
-<div className="story-frame">              <div className="story-frame-inner">
+<div className="story-frame">
+              {/* THE OVERLAPPING STAMP LOGO */}
+              <img src="/gr-crest.png" alt="Gigi's Crest Stamp" className="stamp-logo" />
+              
+              <div className="story-frame-inner">
                 {/* Swap this image out for a real photo of your studio or favorite dress! */}
                 <img src="/about/GGRNTL.png" alt="Inside Gigi's Rentals Atelier" />
               </div>
@@ -483,13 +508,16 @@ export default function AboutPage() {
       {/* --- FOUNDER'S NOTE & CTA --- */}
       <section className="promise-section">
         <div className="full-wrap">
-<div className="promise-box">            <h2>Our Promise to You</h2>
+          <div className="promise-box">
+            <h2>Our Promise to You</h2>
             <p>
               When you step into our studio, you are our sole focus. We promise to handle your fittings with care, keep our collection in pristine, dry-cleaned condition, and help you find a silhouette that makes your heart flutter.
             </p>
-            <div className="signature">With all our love, Gigi</div>
             
-<Link
+            {/* The Logo Crest! */}
+            <img src="/gr-crest.png" alt="Gigi's Rentals Crest" className="signature-crest" />
+            
+            <Link
               href="/collections"
               className="gg-btn-primary"
             >
