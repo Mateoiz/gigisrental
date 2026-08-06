@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import SplashScreen from "./components/SplashScreen";
 import Navbar from "./components/Navbar";
+import { Analytics } from "@vercel/analytics/next"
 
 const parisienne = Parisienne({
   weight: "400",
@@ -123,6 +124,7 @@ export default function RootLayout({
         <SplashScreen />
         <Navbar />
         {children}
+        <Analytics />
       </body>
     </html>
   );
