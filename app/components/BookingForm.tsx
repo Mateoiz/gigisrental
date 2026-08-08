@@ -10,7 +10,8 @@ interface BookingState {
   dressName: string | null
   date: string | null
   time: string | null
-  rentalDays: number | null
+rentalDays: number | null
+  endDate: string | null
   name: string
   email: string
   phone: string
@@ -46,6 +47,17 @@ function generateDates(days = 21) {
   return out
 }
 
+function calcTotal(basePrice: number, extraDayRate: number, days: number): number {
+  if (days <= 3) return basePrice
+  return basePrice + (days - 3) * extraDayRate
+}
+
+function dateDiffDays(startIso: string, endIso: string): number {
+  const a = new Date(startIso + 'T00:00:00')
+  const b = new Date(endIso + 'T00:00:00')
+  return Math.round((b.getTime() - a.getTime()) / 86400000) + 1
+}
+
 export default function BookingForm() {
   const searchParams = useSearchParams()
   const dressSlug = searchParams.get('dress')
@@ -55,20 +67,25 @@ export default function BookingForm() {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   
-  const [allDresses, setAllDresses] = useState<{ id: string; name: string; is_available: boolean; slug: string }[]>([])
+  const [allDresses, setAllDresses] = useState<{ id: string; name: string; is_available: boolean; slug: string; category: string | null; base_price: number; extra_day_rate: number }[]>([])
   const [preselectedDress, setPreselectedDress] = useState<{ id: string; name: string; category: string | null; is_available: boolean } | null>(null)
   const [dressLoading, setDressLoading] = useState(true)
   const [bookedDatesByDress, setBookedDatesByDress] = useState<Record<string, string[]>>({})
   
-  // NEW: Search state for the dress list
+// NEW: Search state for the dress list
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Pricing for selected dress
+  const [selectedBasePrice, setSelectedBasePrice] = useState(0)
+  const [selectedExtraDayRate, setSelectedExtraDayRate] = useState(0)
 
   const [booking, setBooking] = useState<BookingState>({
     dressId: null,
     dressName: null,
     date: null,
     time: null,
-    rentalDays: 3,
+rentalDays: 3,
+    endDate: null,
     name: '',
     email: '',
     phone: '',
@@ -79,9 +96,9 @@ export default function BookingForm() {
   // Fetch ALL dresses
   useEffect(() => {
     const fetchDresses = async () => {
-      const { data } = await supabase
+const { data } = await supabase
         .from('dresses')
-        .select('id, name, slug, category, is_available')
+        .select('id, name, slug, category, is_available, base_price, extra_day_rate')
         .order('name')
 
       if (data) {
@@ -89,9 +106,11 @@ export default function BookingForm() {
         
         if (dressSlug) {
           const preselected = data.find(d => d.slug === dressSlug)
-          if (preselected) {
+if (preselected) {
             setPreselectedDress(preselected)
             setBooking((b) => ({ ...b, dressId: preselected.id, dressName: preselected.name }))
+            setSelectedBasePrice(preselected.base_price)
+            setSelectedExtraDayRate(preselected.extra_day_rate)
             setStep(1)
           }
         }
@@ -148,7 +167,7 @@ export default function BookingForm() {
   const canProceed = () => {
     switch (step) {
       case 0: return !!booking.dressId
-      case 1: return !!booking.date
+    case 1: return !!booking.date && !!booking.endDate && dateDiffDays(booking.date, booking.endDate) >= 3 && dateDiffDays(booking.date, booking.endDate) <= 5
       case 2: return !!booking.time
       case 3: return booking.name.trim() !== '' && booking.email.trim() !== '' && booking.phone.trim() !== '' && booking.fbLink.trim() !== ''
       default: return true
@@ -169,8 +188,7 @@ const next = async () => {
         category: booking.dressName, 
         booking_date: booking.date,
         booking_time: booking.time,
-        rental_days: booking.rentalDays,
-        full_name: booking.name,
+rental_days: booking.date && booking.endDate ? dateDiffDays(booking.date, booking.endDate) : booking.rentalDays,        full_name: booking.name,
         email: booking.email,
         phone: booking.phone,
         fb_link: booking.fbLink,
@@ -361,10 +379,15 @@ const next = async () => {
         .bk-date-cell:hover { border-color: var(--rose-deep); }
         .bk-date-cell.selected { background: var(--rose-deep); border-color: var(--rose-deep); }
         .bk-date-cell.selected .wk, .bk-date-cell.selected .num, .bk-date-cell.selected .mo { color: #fff; }
-        .bk-date-cell.is-booked { cursor: not-allowed; opacity: 0.45; background: var(--card); }
+      .bk-date-cell.is-booked { cursor: not-allowed; opacity: 0.45; background: var(--card); }
         .bk-date-cell.is-booked:hover { border-color: rgba(226, 166, 180, 0.5); }
         .booked-tag { display: block; font-size: 0.55rem; letter-spacing: 0.02em; text-transform: uppercase; color: var(--rose-deep); margin-top: 4px; font-weight: 600; }
-
+        .bk-date-cell.is-start { background: var(--rose-deep); border-color: var(--rose-deep); }
+        .bk-date-cell.is-start .wk, .bk-date-cell.is-start .num, .bk-date-cell.is-start .mo { color: #fff; }
+        .bk-date-cell.is-end { background: var(--rose-deep); border-color: var(--rose-deep); }
+        .bk-date-cell.is-end .wk, .bk-date-cell.is-end .num, .bk-date-cell.is-end .mo { color: #fff; }
+        .bk-date-cell.in-range { background: var(--blush-ribbon); border-color: rgba(226, 166, 180, 0.7); }
+        .bk-date-cell.in-range .wk, .bk-date-cell.in-range .num, .bk-date-cell.in-range .mo { color: var(--rose-deep); }
         .bk-time-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
         .bk-time-cell { background: var(--card); border: 1.5px solid rgba(226, 166, 180, 0.5); border-radius: 999px; padding: 12px; text-align: center; font-size: .88rem; cursor: pointer; transition: all .2s ease; }
         .bk-time-cell:hover { border-color: var(--rose-deep); }
@@ -397,7 +420,68 @@ const next = async () => {
         .bk-success .stamp { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--rose-deep); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.8rem; color: var(--rose-deep); }
         .bk-success h2 { font-style: italic; font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: 10px; }
         .bk-success p { color: var(--ink-body); max-width: 420px; margin: 0 auto; }
-        .bk-signoff { font-family: 'Parisienne', cursive; font-size: 1.8rem; color: var(--rose-deep); margin-top: 22px; }
+      .bk-signoff { font-family: 'Parisienne', cursive; font-size: 1.8rem; color: var(--rose-deep); margin-top: 22px; }
+
+        /* --- RENTAL DAYS PICKER --- */
+        .bk-days-picker {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-top: 24px; padding: 18px 20px;
+          background: var(--blush-ribbon);
+          border: 1.5px solid rgba(226, 166, 180, 0.6);
+          border-radius: 16px; gap: 16px;
+        }
+        .bk-days-label { display: flex; flex-direction: column; gap: 3px; }
+        .bk-days-title { font-size: 0.85rem; font-weight: 500; color: var(--mocha); }
+        .bk-days-sub { font-size: 0.72rem; color: var(--mocha-soft); letter-spacing: 0.04em; }
+        .bk-days-stepper { display: flex; align-items: center; gap: 16px; }
+        .bk-stepper-btn {
+          width: 36px; height: 36px; border-radius: 50%;
+          border: 1.5px solid var(--rose); background: var(--card);
+          color: var(--rose-deep); font-size: 1.2rem; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          transition: all 0.2s ease; line-height: 1;
+        }
+        .bk-stepper-btn:hover:not(:disabled) { background: var(--rose-deep); color: #fff; border-color: var(--rose-deep); }
+        .bk-stepper-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .bk-stepper-value {
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 1.8rem; font-weight: 600; color: var(--mocha);
+          min-width: 60px; text-align: center; line-height: 1;
+          display: flex; flex-direction: column; align-items: center; gap: 2px;
+        }
+        .bk-stepper-unit {
+          font-family: 'Jost', sans-serif; font-size: 0.65rem;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          color: var(--mocha-soft); font-weight: 400;
+        }
+        .bk-extended-note {
+          margin-top: 12px; font-size: 0.8rem;
+          color: var(--mocha-soft); text-align: center; line-height: 1.5;
+        }
+        .bk-extended-note a { color: var(--rose-deep); text-decoration: underline; text-underline-offset: 3px; }
+
+        /* --- PERSISTENT PRICE STRIP --- */
+        .bk-price-strip {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-top: 28px; padding: 16px 20px;
+          background: var(--mocha); border-radius: 14px; gap: 12px;
+        }
+        .bk-price-strip-info { display: flex; flex-direction: column; gap: 3px; }
+        .bk-price-strip-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: rgba(255,255,255,0.55); font-weight: 500; }
+        .bk-price-strip-days { font-size: 0.82rem; color: rgba(255,255,255,0.8); }
+        .bk-price-strip-amount { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 600; color: #fff; white-space: nowrap; }
+
+        /* --- CONFIRM PRICE ROW --- */
+        .bk-summary-price { border-color: var(--rose) !important; background: var(--blush-ribbon) !important; }
+        .bk-summary-price .v { color: var(--rose-deep) !important; font-size: 1rem; }
+        .bk-price-note { font-size: 0.75rem; color: var(--mocha-soft); font-weight: 400; }
+        .bk-payment-note {
+          font-size: 0.8rem; color: var(--mocha-soft); line-height: 1.6;
+          padding: 12px 16px; background: var(--blush-ribbon);
+          border-radius: 10px; border-left: 3px solid var(--rose);
+          margin-top: -4px;
+        }
+        .bk-payment-note a { color: var(--rose-deep); text-decoration: underline; text-underline-offset: 3px; }
       `}</style>
       
       <div className="bk-root">
@@ -471,9 +555,11 @@ const next = async () => {
                         key={d.id}
                         type="button"
                         className={`bk-option ${booking.dressId === d.id ? 'selected' : ''}`}
-                        onClick={() => {
+onClick={() => {
                           update('dressId', d.id)
                           update('dressName', d.name)
+                          setSelectedBasePrice(d.base_price)
+                          setSelectedExtraDayRate(d.extra_day_rate)
                         }}
                       >
                         <h4>{d.name}</h4>
@@ -484,46 +570,95 @@ const next = async () => {
                       <p style={{ textAlign: 'center', color: 'var(--mocha-soft)', gridColumn: '1 / -1', padding: '20px 0', fontSize: '0.9rem' }}>
                         No pieces found matching &quot;{searchQuery}&quot;.
                       </p>
-                    )}{displayedDresses.length === 0 && (
-                      <p style={{ textAlign: 'center', color: 'var(--mocha-soft)', gridColumn: '1 / -1', padding: '20px 0', fontSize: '0.9rem' }}>
-                        No pieces found matching &quot;{searchQuery}&quot;.
-                      </p>
                     )}
                   </div>
                 </>
               )}
 
               {/* --- STEP 1: DATE --- */}
-              {step === 1 && (
-                <>
-                  <div className="bk-card-header">
-                    <h2>Choose your date</h2>
-                    <p>Select a day that works for you (closed Sundays).</p>
-                  </div>
-                  <div className="bk-date-grid">
-                    {dates.map((d) => {
-                      const isBooked = booking.dressId
-                        ? (bookedDatesByDress[booking.dressId] || []).includes(d.iso)
-                        : false
-                      return (
-                        <button
-                          key={d.iso}
-                          type="button"
-                          className={`bk-date-cell ${booking.date === d.iso ? 'selected' : ''} ${isBooked ? 'is-booked' : ''}`}
-                          onClick={() => { if (!isBooked) update('date', d.iso) }}
-                          disabled={isBooked}
-                          aria-disabled={isBooked}
-                        >
-                          <span className="wk">{d.weekday}</span>
-                          <span className="num">{d.day}</span>
-                          <span className="mo">{d.month}</span>
-                          {isBooked && <span className="booked-tag">Booked this day</span>}
-                        </button>
-                      )
-                    })}
-                  </div>
-                </>
-              )}
+{/* --- STEP 1: DATE --- */}
+              {step === 1 && (() => {
+                const startIso = booking.date
+                const endIso = booking.endDate ?? null
+                const rentalDays = startIso && endIso ? dateDiffDays(startIso, endIso) : null
+                const tooShort = rentalDays !== null && rentalDays < 3
+const tooLong = rentalDays !== null && rentalDays > 5
+
+                return (
+                  <>
+                    <div className="bk-card-header">
+                      <h2>Choose your dates</h2>
+                      <p>
+                        {!startIso
+                          ? 'Select a pickup date.'
+                          : !endIso
+                          ? 'Now select your return date.'
+                          : tooShort
+                          ? 'Minimum rental is 3 days — pick a later return date.'
+: `${rentalDays}-day rental · ₱${calcTotal(selectedBasePrice, selectedExtraDayRate, rentalDays!).toLocaleString()}`}                      </p>
+                    </div>
+                    <div className="bk-date-grid">
+                      {dates.map((d) => {
+                        const isBooked = booking.dressId
+                          ? (bookedDatesByDress[booking.dressId] || []).includes(d.iso)
+                          : false
+                        const isStart = d.iso === startIso
+                        const isEnd = d.iso === endIso
+                        const inRange = !!(startIso && endIso && d.iso > startIso && d.iso < endIso)
+
+                        return (
+                          <button
+                            key={d.iso}
+                            type="button"
+                            className={[
+                              'bk-date-cell',
+                              isStart ? 'is-start' : '',
+                              isEnd ? 'is-end' : '',
+                              inRange ? 'in-range' : '',
+                              isBooked ? 'is-booked' : '',
+                            ].join(' ')}
+                            onClick={() => {
+                              if (isBooked) return
+                              if (!startIso || (startIso && endIso)) {
+                                update('date', d.iso)
+                                update('endDate', null)
+                                update('rentalDays', 3)
+                              } else {
+                                if (d.iso > startIso) {
+                                  const days = dateDiffDays(startIso, d.iso)
+                                  update('endDate', d.iso)
+                                  update('rentalDays', days)
+                                } else {
+                                  update('date', d.iso)
+                                  update('endDate', null)
+                                  update('rentalDays', 3)
+                                }
+                              }
+                            }}
+                            disabled={isBooked}
+                            aria-disabled={isBooked}
+                          >
+                            <span className="wk">{d.weekday}</span>
+                            <span className="num">{d.day}</span>
+                            <span className="mo">{d.month}</span>
+                            {isBooked && <span className="booked-tag">Booked</span>}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {tooLong && (
+                      <p className="bk-extended-note">
+                        Need more than 7 days?{' '}
+                        <a href="https://www.facebook.com/profile.php?id=61592240190387" target="_blank" rel="noopener noreferrer">
+                          Message us on Facebook
+                        </a>{' '}
+                        to arrange an extended rental.
+                      </p>
+                    )}
+                  </>
+                )
+              })()}
 
               {/* --- STEP 2: TIME --- */}
               {step === 2 && (
@@ -621,9 +756,19 @@ const next = async () => {
                       <span className="k">Time</span>
                       <span className="v">{booking.time}</span>
                     </div>
+<div className="bk-summary-row">
+                      <span className="k">Return Date</span>
+                      <span className="v">
+                        {booking.endDate
+                          ? new Date(booking.endDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+                          : '—'}
+                      </span>
+                    </div>
                     <div className="bk-summary-row">
                       <span className="k">Duration</span>
-                      <span className="v">{booking.rentalDays} {booking.rentalDays === 1 ? 'day' : 'days'}</span>
+                      <span className="v">
+                        {booking.date && booking.endDate ? dateDiffDays(booking.date, booking.endDate) : (booking.rentalDays ?? 3)} days
+                      </span>
                     </div>
                     <div className="bk-summary-row">
                       <span className="k">Name</span>
@@ -637,6 +782,24 @@ const next = async () => {
                       <span className="k">Facebook</span>
                       <span className="v">{booking.fbLink}</span>
                     </div>
+<div className="bk-summary-row bk-summary-price">
+                      <span className="k">Estimated Total</span>
+                      <span className="v">
+                        {(() => {
+                          const days = booking.date && booking.endDate
+                            ? dateDiffDays(booking.date, booking.endDate)
+                            : (booking.rentalDays ?? 3)
+                          return <>₱{calcTotal(selectedBasePrice, selectedExtraDayRate, days).toLocaleString()}<span className="bk-price-note"> · {days} days</span></>
+                        })()}
+                      </span>
+                    </div>
+                    <p className="bk-payment-note">
+                      Payment is arranged directly through our{' '}
+                      <a href="https://www.facebook.com/profile.php?id=61592240190387" target="_blank" rel="noopener noreferrer">
+                        Facebook page
+                      </a>.
+                      We&apos;ll reach out with payment details once your booking is confirmed.
+                    </p>
                     {booking.notes && (
                       <div className="bk-summary-row">
                         <span className="k">Notes</span>
@@ -646,6 +809,22 @@ const next = async () => {
                   </div>
                 </>
               )}
+{/* --- ESTIMATED PRICE STRIP --- */}
+              {step >= 1 && selectedBasePrice > 0 && booking.date && booking.endDate && (() => {
+                const days = dateDiffDays(booking.date, booking.endDate)
+             if (days < 3 || days > 5) return null
+                return (
+                  <div className="bk-price-strip">
+                    <div className="bk-price-strip-info">
+                      <span className="bk-price-strip-label">Estimated Total</span>
+                      <span className="bk-price-strip-days">{days} days · {booking.dressName}</span>
+                    </div>
+                    <span className="bk-price-strip-amount">
+                      ₱{calcTotal(selectedBasePrice, selectedExtraDayRate, days).toLocaleString()}
+                    </span>
+                  </div>
+                )
+              })()}
 
               {/* --- NAVIGATION BUTTONS --- */}
               <div className="bk-nav">

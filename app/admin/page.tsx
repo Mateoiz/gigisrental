@@ -20,8 +20,10 @@ type Booking = {
   status: 'pending' | 'approved' | 'completed' | 'cancelled'
   notes: string | null
   dress_id: string | null
-  dresses?: {
+dresses?: {
     name: string
+    base_price: number
+    extra_day_rate: number
   } | null
 }
 
@@ -40,6 +42,11 @@ type ToastState = {
   id: number
   message: string
   tone: 'success' | 'error'
+}
+
+function calcTotal(basePrice: number, extraDayRate: number, days: number): number {
+  if (days <= 3) return basePrice
+  return basePrice + (days - 3) * extraDayRate
 }
 
 export default function AdminDashboard() {
@@ -92,7 +99,7 @@ export default function AdminDashboard() {
     setLoading(true)
     const { data, error } = await supabase
       .from('bookings')
-      .select(`*, dresses ( name )`)
+.select(`*, dresses ( name, base_price, extra_day_rate )`)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -461,10 +468,16 @@ export default function AdminDashboard() {
                         ) : (
                           <div className="font-medium text-[#3D2C2E] text-base">{booking.category}</div>
                         )}
-                        <div className="text-xs text-[#8C666B] mt-2 flex items-center gap-1.5">
+<div className="text-xs text-[#8C666B] mt-2 flex items-center gap-1.5">
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                           Rental duration: <strong className="text-[#3D2C2E]">{booking.rental_days} {booking.rental_days === 1 ? 'day' : 'days'}</strong>
                         </div>
+                        {booking.dresses?.base_price != null && booking.rental_days && (
+                          <div className="text-xs mt-1.5 inline-flex items-center gap-1.5 bg-[#FDF2F5] border border-[#F7E8EC] px-2.5 py-1 rounded-lg text-[#A9647C] font-semibold">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            Est. ₱{calcTotal(booking.dresses.base_price, booking.dresses.extra_day_rate, booking.rental_days).toLocaleString()}
+                          </div>
+                        )}
                       </td>
 
                       {/* Fitting Schedule */}
