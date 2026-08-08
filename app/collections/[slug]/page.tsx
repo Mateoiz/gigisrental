@@ -214,6 +214,7 @@ return (
                           fill
                           sizes="64px"
                           className="dress-thumbnail-img"
+                          unoptimized
                           onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
                       </button>
@@ -246,12 +247,13 @@ return (
                       style={{ animationDelay: `${index * 0.15}s` }}
                     >
 <Image
-                        src={img}
+src={img}
                         alt=""
                         fill
                         sizes="(max-width: 760px) 88vw, 55vw"
                         priority={index === 0}
                         loading={index === 0 ? undefined : 'lazy'}
+                        quality={65}
                         className="dress-gallery-img"
                         onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                       />
@@ -286,7 +288,7 @@ return (
                         className={`mobile-thumb-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Jump to image ${index + 1}`}
                       >
-<Image src={img} alt="" fill sizes="48px" className="dress-thumbnail-img" onError={() => setAllImages((prev) => prev.filter((i) => i !== img))} />                      </button>
+<Image src={img} alt="" fill sizes="48px" className="dress-thumbnail-img" unoptimized onError={() => setAllImages((prev) => prev.filter((i) => i !== img))} />                      </button>
                     ))}
                   </div>
                 )}
@@ -377,10 +379,11 @@ return (
             onDoubleClick={() => setImgScale((s) => (s > 1 ? 1 : 2.5))}
           >
             <Image
-              src={zoomedImage}
+src={zoomedImage}
               alt="Zoomed dress detail"
               fill
               sizes="100vw"
+              unoptimized
               className="lightbox-image"
               style={{ transform: `scale(${imgScale})`, transition: 'transform 0.25s ease' }}
             />
