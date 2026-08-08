@@ -16,8 +16,14 @@ interface Dress {
   description: string | null
   image_base: string | null
   image_hover: string | null
-  gallery: string[] | null // Added to support extra shots
+  gallery: string[] | null
   is_available: boolean
+  base_price: number    
+  extra_day_rate: number    
+}
+
+function formatPricing(basePrice: number, extraDayRate: number): string {
+  return `₱${basePrice.toLocaleString()} for 3 days · +₱${extraDayRate}/day after`
 }
 
 export default function DressDetailPage() {
@@ -298,7 +304,18 @@ return (
                 )}
 
 
-<div className="dress-detail-cta">
+                <div className="dress-pricing">
+                  <span className="pricing-label">Rental Rate</span>
+                  <span className="pricing-value">
+                    ₱{dress.base_price.toLocaleString()}
+                    <span className="pricing-period"> / 3 days</span>
+                  </span>
+                  <span className="pricing-extra">
+                    +₱{dress.extra_day_rate.toLocaleString()} per additional day
+                  </span>
+                </div>
+
+                <div className="dress-detail-cta">
                   <Link
                     href={`/booking?dress=${dress.slug}`}
                     className="btn btn-primary"
@@ -729,6 +746,41 @@ const DRESS_STYLES = `
   white-space: pre-wrap; /* This forces the \n to render as actual line breaks! */
 }
 .dress-detail-unavailable { color: var(--rose-deep); font-style: italic; }
+
+/* --- Pricing Block --- */
+.dress-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  background: var(--blush-ribbon);
+  border-left: 2px solid var(--rose);
+  border-radius: 2px;
+}
+.pricing-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--mocha-soft);
+  font-weight: 500;
+}
+.pricing-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--mocha);
+  line-height: 1.1;
+}
+.pricing-period {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--mocha-soft);
+}
+.pricing-extra {
+  font-size: 0.75rem;
+  color: var(--mocha-soft);
+  letter-spacing: 0.04em;
+}
 
 .dress-detail-cta { display: flex; flex-direction: row; align-items: center; gap: 24px; margin-top: 12px; }
 .dress-detail-cta .btn-primary { border-radius: 4px; }
