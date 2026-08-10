@@ -205,5 +205,15 @@ export const DRESSES: DressPreview[] = [
       'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana3.jpg', 
       'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Oceana4.jpg'
     ]
-  }
+  },
+  {
+    name: 'Genevieve', slug: 'genevieve', 
+    image: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Genevieve1.jpg', 
+    hoverImage: 'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Genevieve2.jpg',
+    gallery: [
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Genevieve1.jpg', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Genevieve2.jpg', 
+      'https://pmrqoxlvmtaevrazsyww.supabase.co/storage/v1/object/public/collections/Genevieve3.jpg', 
+    ]
+  },
 ]
