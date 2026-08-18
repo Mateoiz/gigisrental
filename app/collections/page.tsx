@@ -96,7 +96,7 @@ export default function CollectionsGalleryPage() {
               {filteredDresses.map((dress, i) => (
                 <Link key={dress.slug} href={`/collections/${dress.slug}`} className="gallery-card">
                   <div className="gallery-card-photo-wrap">
-{dress.image_base && (
+                    {dress.image_base && (
                       <Image
                         src={dress.image_base}
                         alt={dress.name}
@@ -109,7 +109,8 @@ export default function CollectionsGalleryPage() {
                         loading={i < 4 ? undefined : 'lazy'}
                       />
                     )}
-{dress.image_hover && (
+                    {/* FIX: removed unoptimized — Next.js now caches this at the edge */}
+                    {dress.image_hover && (
                       <Image
                         src={dress.image_hover}
                         alt=""
@@ -118,7 +119,7 @@ export default function CollectionsGalleryPage() {
                         sizes="(max-width: 760px) 50vw, 25vw"
                         className="gallery-card-photo gallery-card-photo-hover"
                         style={{ objectFit: 'cover' }}
-                        unoptimized
+                        quality={55}
                         loading="lazy"
                       />
                     )}

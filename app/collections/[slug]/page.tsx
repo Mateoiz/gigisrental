@@ -30,8 +30,8 @@ export default function DressDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
 
-const [dress, setDress] = useState<Dress | null>(null)
-const [loading, setLoading] = useState(true)
+  const [dress, setDress] = useState<Dress | null>(null)
+  const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [allImages, setAllImages] = useState<string[]>([])
   const [zoomedImage, setZoomedImage] = useState<string | null>(null)
@@ -41,8 +41,6 @@ const [loading, setLoading] = useState(true)
   const touchStartY = useRef(0)
 
   // Prevent background scrolling and allow Escape key to close lightbox
-
-// Prevent background scrolling and allow Escape key to close lightbox
   useEffect(() => {
     if (zoomedImage) {
       document.body.style.overflow = 'hidden'
@@ -56,7 +54,7 @@ const [loading, setLoading] = useState(true)
         window.removeEventListener('keydown', handleKeyDown)
       }
     } else {
-document.body.style.overflow = 'unset'
+      document.body.style.overflow = 'unset'
     }
   }, [zoomedImage])
 
@@ -67,7 +65,6 @@ document.body.style.overflow = 'unset'
   }, [zoomedImage])
 
   // Scroll-Spy: Track which image is currently in view
-// Scroll-Spy: Track which image is currently in view
   useEffect(() => {
     if (allImages.length === 0) return
     
@@ -94,18 +91,18 @@ document.body.style.overflow = 'unset'
   useEffect(() => {
     if (!slug) return
     const fetchDress = async () => {
-const { data, error } = await supabase
-  .from('dresses')
-  .select('*')
-  .eq('slug', slug)
-  .single()
+      const { data, error } = await supabase
+        .from('dresses')
+        .select('*')
+        .eq('slug', slug)
+        .single()
 
       if (error || !data) {
         setNotFound(true)
       } else {
         setDress(data)
         
-// Compile all valid, unique images into a single array for the gallery
+        // Compile all valid, unique images into a single array for the gallery
         const images: string[] = []
         
         if (data.image_base && data.image_base.trim() !== '') {
@@ -149,9 +146,9 @@ const { data, error } = await supabase
     setDragY(0)
   }
 
-return (
+  return (
     <>
-<style dangerouslySetInnerHTML={{ __html: DRESS_STYLES }} />
+      <style dangerouslySetInnerHTML={{ __html: DRESS_STYLES }} />
 
       <section className="dress-detail-section">
         <div className="wrap">
@@ -186,7 +183,7 @@ return (
             </div>
           )}
 
-{dress && (
+          {dress && (
             <div className="dress-detail">
               
               {/* Left Side: Thumbnails & Main Images */}
@@ -208,13 +205,14 @@ return (
                         className={`dress-thumbnail-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Scroll to image ${index + 1}`}
                       >
-<Image
+                        {/* FIX: removed unoptimized, added quality={40} — thumbnails are tiny, 40 is plenty */}
+                        <Image
                           src={img}
                           alt=""
                           fill
                           sizes="64px"
+                          quality={40}
                           className="dress-thumbnail-img"
-                          unoptimized
                           onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
                       </button>
@@ -223,9 +221,8 @@ return (
                 )}
 
                 {/* Editorial Scroll Display */}
-{/* Editorial Scroll Display */}
                 <div className="dress-gallery scroll-display">
-         {allImages.map((img, index) => (
+                  {allImages.map((img, index) => (
                     <button
                       key={index}
                       id={`gallery-img-${index}`}
@@ -246,8 +243,8 @@ return (
                       aria-label="View zoomed image"
                       style={{ animationDelay: `${index * 0.15}s` }}
                     >
-<Image
-src={img}
+                      <Image
+                        src={img}
                         alt=""
                         fill
                         sizes="(max-width: 760px) 88vw, 55vw"
@@ -288,7 +285,17 @@ src={img}
                         className={`mobile-thumb-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Jump to image ${index + 1}`}
                       >
-<Image src={img} alt="" fill sizes="48px" className="dress-thumbnail-img" unoptimized onError={() => setAllImages((prev) => prev.filter((i) => i !== img))} />                      </button>
+                        {/* FIX: removed unoptimized, added quality={40} — mobile thumbnails are 48px wide */}
+                        <Image
+                          src={img}
+                          alt=""
+                          fill
+                          sizes="48px"
+                          quality={40}
+                          className="dress-thumbnail-img"
+                          onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
+                        />
+                      </button>
                     ))}
                   </div>
                 )}
@@ -304,7 +311,6 @@ src={img}
                 {dress.description && (
                   <p className="dress-detail-desc">{dress.description}</p>
                 )}
-
 
                 <div className="dress-pricing">
                   <span className="pricing-label">Rental Rate</span>
@@ -324,15 +330,15 @@ src={img}
                   >
                     Rent This Dress
                   </Link>
-<Link href="/collections" className="btn-text-link">
+                  <Link href="/collections" className="btn-text-link">
                     Back to Collection
                   </Link>
                 </div>
               </div>
             </div>
           )}
-</div>
-</section>
+        </div>
+      </section>
 
       <section className="dress-detail-section" style={{ paddingTop: 0 }}>
         <div className="wrap">
@@ -356,7 +362,6 @@ src={img}
         </div>
       </section>
 
-
       {/* Full-Screen Zoom Lightbox — supports pinch/double-tap zoom and swipe-down-to-dismiss on touch */}
       {zoomedImage && (
         <div
@@ -378,12 +383,13 @@ src={img}
             onClick={(e) => e.stopPropagation()}
             onDoubleClick={() => setImgScale((s) => (s > 1 ? 1 : 2.5))}
           >
+            {/* FIX: removed unoptimized, added quality={75} — lightbox is full-screen but one image at a time */}
             <Image
-src={zoomedImage}
+              src={zoomedImage}
               alt="Zoomed dress detail"
               fill
               sizes="100vw"
-              unoptimized
+              quality={75}
               className="lightbox-image"
               style={{ transform: `scale(${imgScale})`, transition: 'transform 0.25s ease' }}
             />
