@@ -325,6 +325,12 @@ export default function AdminDashboard() {
             >
               View live site
             </Link>
+            <Link
+  href="/admin/dresses"
+  className="px-6 py-2 rounded-full border border-[#E5D7D3] text-[#8C666B] hover:bg-white transition-colors text-sm font-medium uppercase tracking-widest text-center"
+>
+  Manage Dresses
+</Link>
           </div>
         </div>
 
