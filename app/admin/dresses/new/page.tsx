@@ -213,6 +213,7 @@ export default function NewDressPage() {
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputClass}>
                   <option value="long">Long</option>
                   <option value="mini">Mini</option>
+                  <option value="wedding">Wedding</option>
                 </select>
               </Field>
               <Field label="Slug preview">

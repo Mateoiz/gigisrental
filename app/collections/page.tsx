@@ -26,12 +26,12 @@ export default function CollectionsGalleryPage() {
   // Fetch from database on mount
   useEffect(() => {
     const fetchDresses = async () => {
-      const { data, error } = await supabase
-        .from('dresses')
-        .select('slug, name, category, image_base, image_hover')
-        // Only fetch available dresses if you want to hide unavailable ones:
-        // .eq('is_available', true) 
-        .order('name')
+    const { data, error } = await supabase
+      .from('dresses')
+      .select('slug, name, category, image_base, image_hover')
+      .neq('category', 'wedding')
+      .eq('is_available', true)
+      .order('name')
 
       if (data && !error) {
         setDresses(data)

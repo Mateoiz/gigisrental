@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 const NAV_LINKS = [
   { label: "About", href: "/about" },
   { label: "Collections", href: "/collections" },
+  { label: "Wedding", href: "/wedding", highlight: true },
   { label: "Guidelines", href: "/guidelines" },
   { label: "Contact", href: "/contact" },
 ];
@@ -72,17 +73,27 @@ export default function Navbar() {
 
         {/* CENTER — Nav links */}
         <nav className="hidden lg:flex items-center gap-9">
-          {NAV_LINKS.map(({ label, href }) => {
+          {NAV_LINKS.map(({ label, href, highlight }) => {
             const active = isActive(href);
             return (
               <Link
                 key={label}
                 href={href}
-                className={`group relative text-[11px] font-semibold tracking-widest uppercase transition-colors duration-300 whitespace-nowrap py-2 ${
-                  active ? "text-[#C2547A]" : "text-[#B06080] hover:text-[#C2547A]"
+                className={`group relative text-[11px] font-semibold tracking-widest uppercase transition-colors duration-300 whitespace-nowrap py-2 flex items-center gap-1.5 ${
+                  active ? "text-[#C2547A]" : highlight ? "text-[#C2547A]" : "text-[#B06080] hover:text-[#C2547A]"
                 }`}
               >
+                {highlight && (
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="text-[#E8A0B8]">
+                    <path d="M12 2l1.6 5.8L19 9l-5.4 1.2L12 16l-1.6-5.8L5 9l5.4-1.2L12 2z" />
+                  </svg>
+                )}
                 {label}
+                {highlight && (
+                  <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-gradient-to-r from-[#F2D0E4] to-[#E8A0B8] text-[8px] font-bold tracking-wider text-[#8A2F52] normal-case">
+                    New
+                  </span>
+                )}
                 <span
                   className={`absolute -bottom-0.5 left-0 h-px bg-[#E8A0B8] transition-all duration-300 ${
                     active ? "w-full" : "w-0 group-hover:w-full"
@@ -126,7 +137,7 @@ export default function Navbar() {
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
         <div className="absolute top-full left-0 right-0 min-h-[calc(100vh-72px)] bg-[#FFF5F8] px-6 py-6 flex flex-col gap-1 lg:hidden border-t border-[#F2C4D4] z-40">
-          {NAV_LINKS.map(({ label, href }) => {
+          {NAV_LINKS.map(({ label, href, highlight }) => {
             const active = isActive(href);
             return (
               <Link
@@ -137,7 +148,14 @@ export default function Navbar() {
                   active ? "text-[#C2547A]" : "text-[#B06080] hover:text-[#C2547A]"
                 }`}
               >
-                {label}
+                <span className="flex items-center gap-2">
+                  {label}
+                  {highlight && (
+                    <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#F2D0E4] to-[#E8A0B8] text-[9px] font-bold tracking-wider text-[#8A2F52] normal-case">
+                      New
+                    </span>
+                  )}
+                </span>
               </Link>
             );
           })}
