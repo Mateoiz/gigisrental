@@ -76,10 +76,11 @@ export default function NewDressPage() {
 
   const uploadOne = async (file: File, slug: string, label: string): Promise<string> => {
     const path = `${slug}/${label}-${Date.now()}.jpg`
-    const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
-      contentType: 'image/jpeg',
-      upsert: false,
-    })
+const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
+  contentType: 'image/jpeg',
+  upsert: false,
+  cacheControl: '31536000', // 1 year — safe since we never overwrite the same path
+})
     if (uploadError) throw new Error(`Upload failed (${label}): ${uploadError.message}`)
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
     return data.publicUrl

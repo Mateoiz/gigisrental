@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { useRequireAuth } from '../useRequireAuth'
 
@@ -230,12 +229,12 @@ export default function AdminDressesListPage() {
               >
                 <div className="relative aspect-[3/4] bg-[#FBF9F6]">
                   {dress.image_base ? (
-                    <Image
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
                       src={dress.image_base}
                       alt={dress.name}
-                      fill
-                      sizes="(max-width: 760px) 50vw, 20vw"
-                      style={{ objectFit: 'cover' }}
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-[#D8BFC6] text-xs">

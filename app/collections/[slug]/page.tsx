@@ -26,9 +26,22 @@ function formatPricing(basePrice: number, extraDayRate: number): string {
   return `₱${basePrice.toLocaleString()} for 3 days · +₱${extraDayRate}/day after`
 }
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState<boolean | null>(null)
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 761px)')
+    setIsDesktop(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+  return isDesktop
+}
+
 export default function DressDetailPage() {
   const params = useParams()
   const slug = params?.slug as string
+  const isDesktop = useIsDesktop()
 
   const [dress, setDress] = useState<Dress | null>(null)
   const [loading, setLoading] = useState(true)
@@ -190,7 +203,7 @@ export default function DressDetailPage() {
               <div className="dress-visuals">
                 
                 {/* Mini Thumbnail Scroll (Desktop Only) */}
-                {allImages.length > 1 && (
+                {allImages.length > 1 && isDesktop === true && (
                   <div className="dress-thumbnails">
                     {allImages.map((img, index) => (
                       <button
@@ -211,7 +224,7 @@ export default function DressDetailPage() {
                           alt=""
                           fill
                           sizes="64px"
-                          quality={40}
+                          quality={75}
                           className="dress-thumbnail-img"
                           onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
@@ -250,7 +263,7 @@ export default function DressDetailPage() {
                         sizes="(max-width: 760px) 88vw, 55vw"
                         priority={index === 0}
                         loading={index === 0 ? undefined : 'lazy'}
-                        quality={65}
+                        quality={75}
                         className="dress-gallery-img"
                         onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                       />
@@ -269,7 +282,7 @@ export default function DressDetailPage() {
                 </div>
 
                 {/* Mobile Tap-to-Jump Thumbnail Strip (replaces hidden desktop thumbnails on mobile) */}
-                {allImages.length > 1 && (
+                {allImages.length > 1 && isDesktop === false && (
                   <div className="mobile-thumb-strip">
                     {allImages.map((img, index) => (
                       <button
@@ -285,14 +298,12 @@ export default function DressDetailPage() {
                         className={`mobile-thumb-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Jump to image ${index + 1}`}
                       >
-                        {/* FIX: removed unoptimized, added quality={40} — mobile thumbnails are 48px wide */}
                         <Image
                           src={img}
                           alt=""
                           fill
                           sizes="48px"
-                          quality={40}
-                          className="dress-thumbnail-img"
+                          quality={75}
                           onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
                       </button>
