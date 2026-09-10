@@ -218,13 +218,12 @@ export default function DressDetailPage() {
                         className={`dress-thumbnail-item ${activeIndex === index ? 'is-active' : ''}`}
                         aria-label={`Scroll to image ${index + 1}`}
                       >
-                        {/* FIX: removed unoptimized, added quality={40} — thumbnails are tiny, 40 is plenty */}
                         <Image
                           src={img}
                           alt=""
                           fill
+                          unoptimized
                           sizes="64px"
-                          quality={75}
                           className="dress-thumbnail-img"
                           onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
@@ -260,13 +259,20 @@ export default function DressDetailPage() {
                         src={img}
                         alt=""
                         fill
+                        unoptimized
                         sizes="(max-width: 760px) 88vw, 55vw"
                         priority={index === 0}
                         loading={index === 0 ? undefined : 'lazy'}
-                        quality={75}
                         className="dress-gallery-img"
                         onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
-                      />
+                      />                         <Image
+                          src={img}
+                          alt=""
+                          fill
+                          unoptimized
+                          sizes="48px"
+                          onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
+                        />
                     </button>
                   ))}
                 </div>
@@ -302,8 +308,8 @@ export default function DressDetailPage() {
                           src={img}
                           alt=""
                           fill
+                          unoptimized
                           sizes="48px"
-                          quality={75}
                           onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
                         />
                       </button>
@@ -399,8 +405,8 @@ export default function DressDetailPage() {
               src={zoomedImage}
               alt="Zoomed dress detail"
               fill
+              unoptimized
               sizes="100vw"
-              quality={75}
               className="lightbox-image"
               style={{ transform: `scale(${imgScale})`, transition: 'transform 0.25s ease' }}
             />

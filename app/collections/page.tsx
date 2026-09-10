@@ -101,10 +101,10 @@ export default function CollectionsGalleryPage() {
                         src={dress.image_base}
                         alt={dress.name}
                         fill
+                        unoptimized
                         sizes="(max-width: 760px) 50vw, 25vw"
                         className="gallery-card-photo gallery-card-photo-base"
                         style={{ objectFit: 'cover' }}
-                        quality={75}
                         priority={i < 4}
                         loading={i < 4 ? undefined : 'lazy'}
                       />
@@ -116,10 +116,10 @@ export default function CollectionsGalleryPage() {
                         alt=""
                         aria-hidden="true"
                         fill
+                        unoptimized
                         sizes="(max-width: 760px) 50vw, 25vw"
                         className="gallery-card-photo gallery-card-photo-hover"
                         style={{ objectFit: 'cover' }}
-                        quality={75}
                         loading="lazy"
                       />
                     )}
