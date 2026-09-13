@@ -265,14 +265,7 @@ export default function DressDetailPage() {
                         loading={index === 0 ? undefined : 'lazy'}
                         className="dress-gallery-img"
                         onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
-                      />                         <Image
-                          src={img}
-                          alt=""
-                          fill
-                          unoptimized
-                          sizes="48px"
-                          onError={() => setAllImages((prev) => prev.filter((i) => i !== img))}
-                        />
+                      />
                     </button>
                   ))}
                 </div>
